@@ -3,8 +3,19 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    ViteImageOptimizer({
+      png: { quality: 80 },
+      jpeg: { quality: 80 },
+      jpg: { quality: 80 },
+      webp: { lossless: true },
+    })
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -13,8 +24,5 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
-    allowedHosts: [
-      "e376-2409-40f4-3a-e8d4-a54d-ae5a-8406-3828.ngrok-free.app"
-    ]
   },
 })
