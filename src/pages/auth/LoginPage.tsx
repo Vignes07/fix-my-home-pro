@@ -34,22 +34,57 @@ export default function LoginPage() {
             const result = await authService.signIn(data.email, data.password)
             // result contains { user, session } from Supabase
             if (result.user && result.session) {
+                // Fetch real user_type from the users DB table (not auth metadata)
+                let userType = result.user.user_metadata?.user_type || 'customer';
+                try {
+                    const { api } = await import('@/services/api')
+                    const profileRes = await api.get(`/bookings/profile`, {
+                        headers: { Authorization: `Bearer ${result.session.access_token}` }
+                    })
+                    if (profileRes.data?.data?.user_type) {
+                        userType = profileRes.data.data.user_type
+                    }
+                } catch {
+                    // If profile fetch fails, try direct Supabase query
+                    try {
+                        const { supabase } = await import('@/services/supabase')
+                        const { data: dbUser } = await supabase
+                            .from('users')
+                            .select('user_type')
+                            .eq('id', result.user.id)
+                            .single()
+                        if (dbUser?.user_type) {
+                            userType = dbUser.user_type
+                        }
+                    } catch {
+                        // Fall back to auth metadata
+                    }
+                }
+
                 // Map Supabase user to our User type and call login()
                 const appUser = {
                     id: result.user.id,
                     email: result.user.email || data.email,
                     full_name: result.user.user_metadata?.full_name || '',
                     phone: result.user.user_metadata?.phone || result.user.phone || '',
-                    user_type: result.user.user_metadata?.user_type || 'customer',
+                    user_type: userType,
                     is_active: true,
                     profile_photo_url: result.user.user_metadata?.profile_photo_url || '',
                     created_at: result.user.created_at || '',
                     updated_at: result.user.updated_at || '',
                 }
                 login(appUser as any, result.session)
+
+                // Role-based redirect
+                setEmail(data.email)
+                if (userType === 'admin') {
+                    navigate('/admin')
+                } else if (userType === 'technician') {
+                    navigate('/technician/dashboard')
+                } else {
+                    navigate('/')
+                }
             }
-            setEmail(data.email)
-            navigate('/')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign in')
         } finally {
