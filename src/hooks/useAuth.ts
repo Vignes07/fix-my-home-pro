@@ -14,11 +14,9 @@ export function useAuth() {
         session,
         isAuthenticated,
         userType,
-        phone,
         isLoading,
         setUser,
         setSession,
-        setPhone,
         setLoading,
         login,
         logout: storeLogout,
@@ -37,30 +35,6 @@ export function useAuth() {
         return () => subscription.unsubscribe()
     }, [setSession, storeLogout])
 
-    const sendOtp = useCallback(async (phoneNumber: string) => {
-        setLoading(true)
-        try {
-            const result = await authService.sendOtp(phoneNumber)
-            setPhone(phoneNumber)
-            return result
-        } finally {
-            setLoading(false)
-        }
-    }, [setLoading, setPhone])
-
-    const verifyOtp = useCallback(async (otp: string) => {
-        setLoading(true)
-        try {
-            const result = await authService.verifyOtp(phone, otp)
-            if (result.session) {
-                setSession(result.session as any)
-            }
-            return result
-        } finally {
-            setLoading(false)
-        }
-    }, [phone, setLoading, setSession])
-
     const signOut = useCallback(async () => {
         setLoading(true)
         try {
@@ -77,12 +51,9 @@ export function useAuth() {
         session,
         isAuthenticated,
         userType,
-        phone,
         isLoading,
         setUser,
         login,
-        sendOtp,
-        verifyOtp,
         signOut,
     }
 }
