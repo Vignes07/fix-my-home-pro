@@ -9,11 +9,14 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Logo } from '@/components/common/Logo'
 import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema'
+import { authService } from '@/services/auth.service'
+import { supabase } from '@/services/supabase'
 import { cn } from '@/utils/cn'
 
 export default function RegisterPage() {
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     const {
         register,
@@ -27,19 +30,47 @@ export default function RegisterPage() {
             full_name: '',
             email: '',
             phone: '',
+            password: '',
             user_type: 'customer',
         },
     })
 
     const selectedType = watch('user_type')
 
-    const onSubmit = async (_data: RegisterFormData) => {
+    const onSubmit = async (data: RegisterFormData) => {
         setIsLoading(true)
+        setError(null)
         try {
-            // Registration will go through OTP flow
+            const phone = data.phone.startsWith('+91') ? data.phone : `+91${data.phone}`
+
+            // 1. Create auth user in Supabase Auth
+            const result = await authService.signUp(data.email, data.password, {
+                full_name: data.full_name,
+                phone: phone,
+                user_type: data.user_type
+            })
+
+            // 2. Insert user into the `users` table so it shows up in the DB
+            if (result.user) {
+                const { error: insertError } = await supabase
+                    .from('users')
+                    .upsert([{
+                        id: result.user.id,
+                        full_name: data.full_name,
+                        email: data.email,
+                        phone: phone,
+                        user_type: data.user_type,
+                        is_active: true,
+                    }], { onConflict: 'id' })
+
+                if (insertError) {
+                    console.error('Failed to insert user into users table:', insertError)
+                }
+            }
+
             navigate('/login')
-        } catch {
-            // Handle error
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to register')
         } finally {
             setIsLoading(false)
         }
@@ -110,9 +141,7 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">
-                                    Email <span className="text-muted-foreground">(optional)</span>
-                                </Label>
+                                <Label htmlFor="email">Email Address</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -137,6 +166,25 @@ export default function RegisterPage() {
                                     <p className="text-sm text-destructive">{errors.phone.message}</p>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Create a password"
+                                    {...register('password')}
+                                />
+                                {errors.password && (
+                                    <p className="text-sm text-destructive">{errors.password.message}</p>
+                                )}
+                            </div>
+
+                            {error && (
+                                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                                    {error}
+                                </div>
+                            )}
 
                             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                                 {isLoading ? 'Creating Account...' : 'Create Account'}

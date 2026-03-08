@@ -1,97 +1,98 @@
+import { api } from './api'
+
 declare global {
     interface Window {
-        Razorpay: new (options: RazorpayOptions) => RazorpayInstance
+        Razorpay: any
     }
-}
-
-interface RazorpayOptions {
-    key: string
-    amount: number
-    currency: string
-    name: string
-    description?: string
-    order_id: string
-    prefill?: {
-        name?: string
-        email?: string
-        contact?: string
-    }
-    theme?: {
-        color?: string
-    }
-    handler: (response: RazorpayResponse) => void
-    modal?: {
-        ondismiss?: () => void
-    }
-}
-
-interface RazorpayInstance {
-    open: () => void
-    close: () => void
-}
-
-export interface RazorpayResponse {
-    razorpay_payment_id: string
-    razorpay_order_id: string
-    razorpay_signature: string
-}
-
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || ''
-
-/**
- * Load Razorpay checkout script dynamically
- */
-function loadRazorpayScript(): Promise<boolean> {
-    return new Promise((resolve) => {
-        if (window.Razorpay) {
-            resolve(true)
-            return
-        }
-        const script = document.createElement('script')
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-        script.onload = () => resolve(true)
-        script.onerror = () => resolve(false)
-        document.body.appendChild(script)
-    })
 }
 
 export const paymentService = {
     /**
+     * Create a Razorpay order via backend
+     */
+    async createOrder(booking_id: string) {
+        const res = await api.post('/payments/create-order', { booking_id })
+        return res.data.data
+    },
+
+    /**
+     * Verify payment via backend
+     */
+    async verifyPayment(data: {
+        razorpay_order_id: string
+        razorpay_payment_id: string
+        razorpay_signature: string
+        booking_id: string
+    }) {
+        const res = await api.post('/payments/verify', data)
+        return res.data.data
+    },
+
+    /**
+     * Load Razorpay script dynamically
+     */
+    loadRazorpayScript(): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (window.Razorpay) {
+                resolve(true)
+                return
+            }
+            const script = document.createElement('script')
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+            script.onload = () => resolve(true)
+            script.onerror = () => resolve(false)
+            document.body.appendChild(script)
+        })
+    },
+
+    /**
      * Open Razorpay checkout
      */
     async openCheckout(options: {
-        orderId: string
+        order_id: string
         amount: number
-        customerName?: string
-        customerEmail?: string
-        customerPhone?: string
-        description?: string
-        onSuccess: (response: RazorpayResponse) => void
-        onDismiss?: () => void
+        booking_id: string
+        customerName: string
+        customerEmail: string
+        customerPhone: string
+        preferredMethod?: string
+        onSuccess: (response: any) => void
+        onFailure: (error: any) => void
     }) {
-        const loaded = await loadRazorpayScript()
+        const loaded = await this.loadRazorpayScript()
         if (!loaded) {
-            throw new Error('Razorpay SDK failed to load')
+            options.onFailure(new Error('Failed to load Razorpay SDK'))
+            return
+        }
+
+        const prefillData: any = {
+            name: options.customerName,
+            email: options.customerEmail,
+            contact: options.customerPhone,
+        }
+
+        if (options.preferredMethod) {
+            prefillData.method = options.preferredMethod
         }
 
         const rzp = new window.Razorpay({
-            key: RAZORPAY_KEY,
-            amount: options.amount * 100, // Convert to paise
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_ROYK0JMAmeBjIC',
+            amount: options.amount,
             currency: 'INR',
             name: 'FixMyHome Pro',
-            description: options.description || 'Service Booking Payment',
-            order_id: options.orderId,
-            prefill: {
-                name: options.customerName,
-                email: options.customerEmail,
-                contact: options.customerPhone,
-            },
+            description: 'Service Booking Payment',
+            order_id: options.order_id,
+            prefill: prefillData,
             theme: {
-                color: '#2563eb',
+                color: '#09172e',
             },
-            handler: options.onSuccess,
+            handler: (response: any) => {
+                options.onSuccess(response)
+            },
             modal: {
-                ondismiss: options.onDismiss,
+                ondismiss: () => {
+                    options.onFailure(new Error('Payment cancelled by user'))
+                },
             },
         })
 

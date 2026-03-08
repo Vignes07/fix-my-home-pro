@@ -85,8 +85,8 @@ export default function ServicesPage() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold">Our Services</h1>
-                <p className="mt-2 text-muted-foreground">
+                <h1 className="text-[42px] font-bold">Our Services</h1>
+                <p className="mt-2 text-[14px] text-muted-foreground">
                     Browse and book professional home services
                 </p>
             </div>
@@ -130,10 +130,14 @@ export default function ServicesPage() {
 
             {/* Services Grid */}
             {isLoading ? (
-                <div className="py-20 text-center animate-pulse">Loading Services from Database...</div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    {Array.from({ length: 15 }).map((_, idx) => (
+                        <div key={idx} className="h-[140px] w-full animate-pulse rounded-xl bg-muted" />
+                    ))}
+                </div>
             ) : (
                 <>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         {filteredServices.map((service) => (
                             <ServiceCard
                                 key={service.id}

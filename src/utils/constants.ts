@@ -29,7 +29,6 @@ export const USER_TYPES = {
 export const ROUTES = {
     HOME: '/',
     LOGIN: '/login',
-    VERIFY_OTP: '/verify-otp',
     REGISTER: '/register',
     SERVICES: '/services',
     SERVICE_DETAIL: '/services/:id',

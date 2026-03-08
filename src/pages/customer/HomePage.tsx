@@ -199,11 +199,11 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
                 <div className="relative z-10 mx-auto max-w-[1440px] px-[100px] pt-[160px]">
-                    <h1 className="text-shadow-hero text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <h1 className="text-shadow-hero text-[42px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Fix Your Home.<br />
                         Fast. Safe. Reliable.
                     </h1>
-                    <p className="mt-6 max-w-[560px] text-[20px] leading-[1.4] tracking-[-0.4px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-6 max-w-[560px] text-[17px] leading-[1.4] tracking-[-0.4px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Book trusted and verified technicians for electrical, plumbing, AC, cleaning, and home maintenance — all in one place.
                     </p>
                     <div className="mt-10 flex items-center gap-4">
@@ -231,14 +231,14 @@ export default function HomePage() {
 
             {/* ====== OUR EXPERT SERVICES ====== */}
             <section className="mx-auto max-w-[1440px] px-[100px] py-16">
-                <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Our Expert Services
                 </h2>
-                <p className="mt-2 text-[24px] font-light tracking-[-0.48px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <p className="mt-2 text-[17px] font-light tracking-[-0.48px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Professional, reliable home services by skilled technicians for<br />
                     safe and quality installation, repair, and maintenance.
                 </p>
-                <div className="relative mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="relative mt-8 grid grid-cols-1 gap-6 md:grid-cols-5">
                     {[
                         { name: 'Electrical Services', img: electricalCard },
                         { name: 'Mechanical Services', img: mechanicalCard },
@@ -320,15 +320,15 @@ export default function HomePage() {
             ) : categories.length > 0 ? categories.map((cat, catIdx) => (
                 <section key={cat.id || cat.name} className="mx-auto max-w-[1440px] px-[100px] pb-12">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {cat.name}
                         </h2>
                         <Link to={`/services`} className="flex items-center text-[20px] tracking-[0.5px] text-[#001c30] transition-colors hover:text-[#facc15]">
                             See All <ChevronRight className="ml-1 h-5 w-5" />
                         </Link>
                     </div>
-                    <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
-                        {cat.services?.slice(0, 4).map((item: any, idx: number) => {
+                    <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-5">
+                        {cat.services?.slice(0, 5).map((item: any, idx: number) => {
                             // Map fallback images since DB doesn't have image URLs yet
                             const fallbackImgList = [imgElectrical, imgPlumbing, imgAC, imgCleaning, imgPainting, imgMechanical, imgCivil];
                             const itemImg = fallbackImgList[(catIdx + idx) % fallbackImgList.length];
@@ -353,14 +353,14 @@ export default function HomePage() {
 
             {/* ====== MORE HOME SOLUTIONS ====== */}
             <section className="mx-auto max-w-[1440px] px-[100px] py-16">
-                <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     More Home Solutions
                 </h2>
-                <p className="mt-2 text-[24px] font-light tracking-[-0.48px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <p className="mt-2 text-[17px] font-light tracking-[-0.48px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Professional, reliable home services by skilled technicians for<br />
                     safe and quality installation, repair, and maintenance.
                 </p>
-                <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-5">
                     {[
                         { title: 'Cleaning Services', desc: 'Deep cleaning • Sanitization • Sofa cleaning', img: imgCleaningCard },
                         { title: 'AC & Appliance', desc: 'AC repair • Fridge • Washing machine', img: imgACCard },
@@ -429,10 +429,10 @@ export default function HomePage() {
 
             {/* ====== MOST BOOKED SERVICES ====== */}
             <section className="mx-auto max-w-[1440px] px-[70px] py-16">
-                <h2 className="text-[40px] font-bold capitalize tracking-[-0.8px] text-[#03132c]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h2 className="text-[32px] font-bold capitalize tracking-[-0.8px] text-[#03132c]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Most booked services
                 </h2>
-                <div className="mt-8 grid grid-cols-1 gap-[38px] sm:grid-cols-2 lg:grid-cols-4">
+                <div className="mt-8 grid grid-cols-1 gap-[38px] sm:grid-cols-2 lg:grid-cols-5">
                     {bookedServices.map((svc) => (
                         <div key={svc.title} className="rounded-[15px] bg-white p-5 shadow-card">
                             <div className="relative h-[251px] w-full overflow-hidden rounded-[10px] bg-[#d7d7d7]">
@@ -472,10 +472,10 @@ export default function HomePage() {
 
             {/* ====== TESTIMONIALS ====== */}
             <section className="mx-auto max-w-[1440px] px-[100px] py-16">
-                <h2 className="text-center text-[40px] font-bold capitalize tracking-[-0.8px] text-[#03132c]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <h2 className="text-center text-[32px] font-bold capitalize tracking-[-0.8px] text-[#03132c]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     feedback from our valued clients
                 </h2>
-                <p className="mx-auto mt-2 max-w-[948px] text-center text-[18px] leading-[35px] text-[#454545]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <p className="mx-auto mt-2 max-w-[948px] text-center text-[17px] leading-[35px] text-[#454545]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Our customers appreciate our fast response, professional technicians, and reliable service quality.<br />
                     Their trust and positive feedback inspire us to deliver safe, efficient, and high-quality home services every day.
                 </p>

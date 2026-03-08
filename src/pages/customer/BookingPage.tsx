@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Clock, MapPin, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { CalendarDays, Clock, MapPin, ArrowRight, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/utils/cn'
+import { bookingService } from '@/services/booking.service'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useBookingStore } from '@/stores/useBookingStore'
 
 const timeSlots = [
     '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM',
@@ -15,25 +19,111 @@ const timeSlots = [
 
 const steps = ['Service', 'Schedule', 'Address', 'Confirm']
 
+// --- Zod Validation Schemas ---
+const scheduleSchema = z.object({
+    selectedDate: z.string().min(1, 'Please select a date'),
+    selectedTime: z.string().min(1, 'Please select a time slot'),
+})
+
+const addressSchema = z.object({
+    houseNo: z.string().min(1, 'House / Flat No is required'),
+    street: z.string().min(1, 'Street / Area is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    pincode: z.string().length(6, 'Valid 6-digit pincode is required'),
+})
+
 export default function BookingPage() {
     const navigate = useNavigate()
-    const [currentStep, setCurrentStep] = useState(0)
-    const [bookingType, setBookingType] = useState<'immediate' | 'scheduled'>('scheduled')
-    const [selectedDate, setSelectedDate] = useState('')
-    const [selectedTime, setSelectedTime] = useState('')
-    const [address, setAddress] = useState('')
+    const [searchParams] = useSearchParams()
+    const { user, session } = useAuthStore()
+
+    // Global persisted store
+    const draft = useBookingStore()
+    const {
+        currentStep, bookingType, selectedDate, selectedTime,
+        houseNo, street, landmark, city, state, pincode,
+        updateDraft, resetBookingFlow
+    } = draft
+
+    const serviceId = searchParams.get('service_id') || searchParams.get('service') || ''
+    const serviceName = searchParams.get('service_name') || 'Home Service'
+    const servicePrice = searchParams.get('price') || ''
+
+    const fullAddress = [houseNo, street, landmark, city, state, pincode].filter(Boolean).join(', ')
+
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const handleNext = () => {
+        setFieldErrors({}) // Reset previous errors
+        let isValid = true;
+        let errors: Record<string, string> = {};
+
+        // Validation per step
+        if (currentStep === 1 && bookingType === 'scheduled') {
+            const result = scheduleSchema.safeParse({ selectedDate, selectedTime })
+            if (!result.success) {
+                isValid = false;
+                result.error.issues.forEach((err: z.ZodIssue) => {
+                    if (err.path[0]) errors[err.path[0] as string] = err.message
+                })
+            }
+        } else if (currentStep === 2) {
+            const result = addressSchema.safeParse({ houseNo, street, city, state, pincode })
+            if (!result.success) {
+                isValid = false;
+                result.error.issues.forEach((err: z.ZodIssue) => {
+                    if (err.path[0]) errors[err.path[0] as string] = err.message
+                })
+            }
+        }
+
+        if (!isValid) {
+            setFieldErrors(errors)
+            return;
+        }
+
         if (currentStep < steps.length - 1) {
-            setCurrentStep((s) => s + 1)
-        } else {
-            // Submit booking
-            navigate('/booking/mock-id/payment')
+            updateDraft({ currentStep: currentStep + 1 })
         }
     }
 
     const handleBack = () => {
-        if (currentStep > 0) setCurrentStep((s) => s - 1)
+        if (currentStep > 0) {
+            setFieldErrors({})
+            updateDraft({ currentStep: currentStep - 1 })
+        }
+    }
+
+    const handleSubmitBooking = async () => {
+        setIsSubmitting(true)
+        setSubmitError(null)
+        try {
+            const token = session?.access_token || ''
+            const res = await bookingService.createBooking({
+                customer_id: user?.id,
+                service_id: serviceId || undefined,
+                booking_date: selectedDate || new Date().toISOString().split('T')[0],
+                booking_time: selectedTime || 'ASAP',
+                booking_type: bookingType,
+                customer_address: fullAddress,
+                estimated_price: servicePrice ? Number(servicePrice) : undefined,
+            }, token)
+
+            const result = res as any
+            const newBookingId = result?.data?.data?.id || result?.data?.id || result?.id || 'new'
+
+            // Clear draft after successful booking
+            resetBookingFlow()
+
+            navigate(`/booking/${newBookingId}/payment`)
+        } catch (err) {
+            setSubmitError(err instanceof Error ? err.message : 'Failed to create booking')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -69,12 +159,19 @@ export default function BookingPage() {
                             <CardHeader className="p-0">
                                 <CardTitle>Booking Type</CardTitle>
                             </CardHeader>
+                            {serviceName && (
+                                <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
+                                    <p className="text-sm text-muted-foreground">Selected Service</p>
+                                    <p className="font-semibold text-lg">{serviceName}</p>
+                                    <p className="text-primary font-bold">₹{servicePrice}</p>
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 {(['immediate', 'scheduled'] as const).map((type) => (
                                     <button
                                         key={type}
                                         type="button"
-                                        onClick={() => setBookingType(type)}
+                                        onClick={() => updateDraft({ bookingType: type })}
                                         className={cn(
                                             'rounded-xl border-2 p-5 text-left transition-all',
                                             bookingType === type
@@ -101,37 +198,56 @@ export default function BookingPage() {
                                     Schedule
                                 </CardTitle>
                             </CardHeader>
-                            <div className="space-y-2">
-                                <Label>Date</Label>
-                                <Input
-                                    type="date"
-                                    value={selectedDate}
-                                    onChange={(e) => setSelectedDate(e.target.value)}
-                                    min={new Date().toISOString().split('T')[0]}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4" /> Time Slot
-                                </Label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {timeSlots.map((time) => (
-                                        <button
-                                            key={time}
-                                            type="button"
-                                            onClick={() => setSelectedTime(time)}
-                                            className={cn(
-                                                'rounded-lg border px-3 py-2 text-sm font-medium transition-all',
-                                                selectedTime === time
-                                                    ? 'border-primary bg-primary/10 text-primary'
-                                                    : 'border-border hover:border-primary/30'
-                                            )}
-                                        >
-                                            {time}
-                                        </button>
-                                    ))}
+                            {bookingType === 'immediate' ? (
+                                <div className="rounded-xl bg-orange-500/10 p-4 text-orange-700">
+                                    <p className="font-medium">⚡ Immediate Service Selected</p>
+                                    <p className="mt-1 text-sm opacity-90">A verified professional will be assigned and reach your location within 60 minutes.</p>
                                 </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label className={fieldErrors.selectedDate ? 'text-destructive' : ''}>Date</Label>
+                                        <Input
+                                            type="date"
+                                            className={fieldErrors.selectedDate ? 'border-destructive focus-visible:ring-destructive' : ''}
+                                            value={selectedDate}
+                                            onChange={(e) => {
+                                                updateDraft({ selectedDate: e.target.value })
+                                                if (fieldErrors.selectedDate) setFieldErrors(prev => ({ ...prev, selectedDate: '' }))
+                                            }}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                        {fieldErrors.selectedDate && <p className="text-xs text-destructive">{fieldErrors.selectedDate}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className={cn('flex items-center gap-2', fieldErrors.selectedTime ? 'text-destructive' : '')}>
+                                            <Clock className="h-4 w-4" /> Time Slot
+                                        </Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {timeSlots.map((time) => (
+                                                <button
+                                                    key={time}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        updateDraft({ selectedTime: time })
+                                                        if (fieldErrors.selectedTime) setFieldErrors(prev => ({ ...prev, selectedTime: '' }))
+                                                    }}
+                                                    className={cn(
+                                                        'rounded-lg border px-3 py-2 text-sm font-medium transition-all',
+                                                        selectedTime === time
+                                                            ? 'border-primary bg-primary/10 text-primary'
+                                                            : 'border-border hover:border-primary/30',
+                                                        fieldErrors.selectedTime && !selectedTime && 'border-destructive/50'
+                                                    )}
+                                                >
+                                                    {time}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {fieldErrors.selectedTime && <p className="mt-1 text-xs text-destructive">{fieldErrors.selectedTime}</p>}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -143,20 +259,81 @@ export default function BookingPage() {
                                     Service Address
                                 </CardTitle>
                             </CardHeader>
-                            <div className="space-y-2">
-                                <Label>Full Address</Label>
-                                <textarea
-                                    className="flex min-h-[120px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    placeholder="Enter your full address including flat/house number, street, landmark..."
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                />
-                            </div>
-                            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
-                                <MapPin className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">
-                                    Map integration will be available here
-                                </p>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2 md:col-span-1">
+                                    <Label className={fieldErrors.houseNo && 'text-destructive'}>House / Flat No.</Label>
+                                    <Input
+                                        placeholder="e.g. 12A"
+                                        value={houseNo}
+                                        className={fieldErrors.houseNo && 'border-destructive focus-visible:ring-destructive'}
+                                        onChange={(e) => {
+                                            updateDraft({ houseNo: e.target.value })
+                                            if (fieldErrors.houseNo) setFieldErrors(prev => ({ ...prev, houseNo: '' }))
+                                        }}
+                                    />
+                                    {fieldErrors.houseNo && <p className="text-xs text-destructive">{fieldErrors.houseNo}</p>}
+                                </div>
+                                <div className="space-y-2 md:col-span-1">
+                                    <Label className={fieldErrors.street && 'text-destructive'}>Street / Area</Label>
+                                    <Input
+                                        placeholder="e.g. MG Road, Anna Nagar"
+                                        value={street}
+                                        className={fieldErrors.street && 'border-destructive focus-visible:ring-destructive'}
+                                        onChange={(e) => {
+                                            updateDraft({ street: e.target.value })
+                                            if (fieldErrors.street) setFieldErrors(prev => ({ ...prev, street: '' }))
+                                        }}
+                                    />
+                                    {fieldErrors.street && <p className="text-xs text-destructive">{fieldErrors.street}</p>}
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label>Landmark <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                                    <Input
+                                        placeholder="e.g. Near Apollo Hospital"
+                                        value={landmark}
+                                        onChange={(e) => updateDraft({ landmark: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className={fieldErrors.city && 'text-destructive'}>City</Label>
+                                    <Input
+                                        placeholder="e.g. Chennai"
+                                        value={city}
+                                        className={fieldErrors.city && 'border-destructive focus-visible:ring-destructive'}
+                                        onChange={(e) => {
+                                            updateDraft({ city: e.target.value })
+                                            if (fieldErrors.city) setFieldErrors(prev => ({ ...prev, city: '' }))
+                                        }}
+                                    />
+                                    {fieldErrors.city && <p className="text-xs text-destructive">{fieldErrors.city}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className={fieldErrors.state && 'text-destructive'}>State</Label>
+                                    <Input
+                                        placeholder="e.g. Tamil Nadu"
+                                        value={state}
+                                        className={fieldErrors.state && 'border-destructive focus-visible:ring-destructive'}
+                                        onChange={(e) => {
+                                            updateDraft({ state: e.target.value })
+                                            if (fieldErrors.state) setFieldErrors(prev => ({ ...prev, state: '' }))
+                                        }}
+                                    />
+                                    {fieldErrors.state && <p className="text-xs text-destructive">{fieldErrors.state}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className={fieldErrors.pincode && 'text-destructive'}>Pincode</Label>
+                                    <Input
+                                        placeholder="e.g. 600001"
+                                        maxLength={6}
+                                        value={pincode}
+                                        className={fieldErrors.pincode && 'border-destructive focus-visible:ring-destructive'}
+                                        onChange={(e) => {
+                                            updateDraft({ pincode: e.target.value })
+                                            if (fieldErrors.pincode) setFieldErrors(prev => ({ ...prev, pincode: '' }))
+                                        }}
+                                    />
+                                    {fieldErrors.pincode && <p className="text-xs text-destructive">{fieldErrors.pincode}</p>}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -172,7 +349,7 @@ export default function BookingPage() {
                             <div className="space-y-3 rounded-xl bg-muted/50 p-4">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Service</span>
-                                    <span className="font-medium">AC Regular Service</span>
+                                    <span className="font-medium">{serviceName}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Type</span>
@@ -180,17 +357,24 @@ export default function BookingPage() {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Date & Time</span>
-                                    <span className="font-medium">{selectedDate || 'Today'} · {selectedTime || 'ASAP'}</span>
+                                    <span className="font-medium">
+                                        {bookingType === 'immediate' ? 'ASAP (Within 60 mins)' : `${selectedDate} \u00B7 ${selectedTime}`}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Address</span>
-                                    <span className="max-w-[200px] text-right font-medium">{address || 'Not provided'}</span>
+                                    <span className="max-w-[200px] text-right font-medium">{fullAddress || 'Not provided'}</span>
                                 </div>
                                 <div className="border-t border-border pt-3 flex justify-between">
                                     <span className="font-semibold">Estimated Total</span>
-                                    <span className="text-lg font-bold text-primary">₹399</span>
+                                    <span className="text-lg font-bold text-primary">₹{servicePrice}</span>
                                 </div>
                             </div>
+                            {submitError && (
+                                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                                    {submitError}
+                                </div>
+                            )}
                         </div>
                     )}
                 </CardContent>
@@ -206,10 +390,19 @@ export default function BookingPage() {
                 >
                     <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <Button onClick={handleNext} className="gap-2">
-                    {currentStep === steps.length - 1 ? 'Proceed to Payment' : 'Next'}
-                    <ArrowRight className="h-4 w-4" />
-                </Button>
+                {currentStep === steps.length - 1 ? (
+                    <Button onClick={handleSubmitBooking} className="gap-2" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <><Loader2 className="h-4 w-4 animate-spin" /> Creating Booking...</>
+                        ) : (
+                            <>Proceed to Payment <ArrowRight className="h-4 w-4" /></>
+                        )}
+                    </Button>
+                ) : (
+                    <Button onClick={handleNext} className="gap-2">
+                        Next <ArrowRight className="h-4 w-4" />
+                    </Button>
+                )}
             </div>
         </div>
     )

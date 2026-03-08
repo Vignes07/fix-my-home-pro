@@ -1,131 +1,233 @@
-import { useState } from 'react'
-import { Search, CheckCircle2, XCircle, Eye, FileText, Clock } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from 'react'
+import { Users, Clock, Search, CheckCircle2, XCircle, CalendarDays, FileText, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { cn } from '@/utils/cn'
+import { api } from '@/services/api'
 
-type TabType = 'pending' | 'approved' | 'rejected'
-
-const mockTechnicians = {
-    pending: [
-        { id: '1', name: 'Suresh Patel', phone: '+91 98765 43210', skill: 'Electrician', submitted: '2026-02-24', docs: 3 },
-        { id: '2', name: 'Ganesh Murugan', phone: '+91 87654 32109', skill: 'Plumber', submitted: '2026-02-23', docs: 4 },
-        { id: '3', name: 'Lakshmi Krishnan', phone: '+91 76543 21098', skill: 'AC Technician', submitted: '2026-02-22', docs: 3 },
-    ],
-    approved: [
-        { id: '4', name: 'Rajesh Kumar', phone: '+91 98765 12345', skill: 'Electrician', submitted: '2026-02-15', docs: 3, rating: 4.8, jobs: 156 },
-        { id: '5', name: 'Arun Sharma', phone: '+91 87654 12345', skill: 'Plumber', submitted: '2026-02-10', docs: 4, rating: 4.5, jobs: 89 },
-    ],
-    rejected: [
-        { id: '6', name: 'Karthik S.', phone: '+91 76543 12345', skill: 'Painter', submitted: '2026-02-18', docs: 2, reason: 'Incomplete documents' },
-    ],
+interface TechApplication {
+    id: string
+    user_id: string
+    aadhar_number: string
+    pan_number: string
+    address: string
+    city: string
+    state: string
+    approval_status: string
+    kyc_verified: boolean
+    bank_account_holder_name: string
+    bank_account_number: string
+    bank_ifsc_code: string
+    created_at: string
+    users: { full_name: string; email: string; phone: string; profile_photo_url?: string }
 }
 
 export default function AdminTechniciansPage() {
-    const [activeTab, setActiveTab] = useState<TabType>('pending')
+    const [applications, setApplications] = useState<TechApplication[]>([])
+    const [loading, setLoading] = useState(true)
+    const [filter, setFilter] = useState<string>('')
     const [search, setSearch] = useState('')
+    const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-    const tabs: { key: TabType; label: string; count: number }[] = [
-        { key: 'pending', label: 'Pending KYC', count: mockTechnicians.pending.length },
-        { key: 'approved', label: 'Approved', count: mockTechnicians.approved.length },
-        { key: 'rejected', label: 'Rejected', count: mockTechnicians.rejected.length },
-    ]
+    useEffect(() => {
+        fetchApplications()
+    }, [filter])
 
-    const techs = mockTechnicians[activeTab].filter((t) =>
-        !search || t.name.toLowerCase().includes(search.toLowerCase())
-    )
+    const fetchApplications = async () => {
+        setLoading(true)
+        try {
+            const url = filter ? `/technicians/admin/applications?status=${filter}` : '/technicians/admin/applications'
+            const res = await api.get(url)
+            setApplications(res.data.data || [])
+        } catch (err) {
+            console.error('Failed to fetch applications:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleAction = async (id: string, status: string) => {
+        setUpdatingId(id)
+        try {
+            await api.patch(`/technicians/admin/${id}/status`, { approval_status: status })
+            fetchApplications()
+        } catch (err) {
+            console.error('Failed to update:', err)
+        } finally {
+            setUpdatingId(null)
+        }
+    }
+
+    const filteredApps = applications.filter(app => {
+        if (!search) return true
+        const name = app.users?.full_name?.toLowerCase() || ''
+        const email = app.users?.email?.toLowerCase() || ''
+        return name.includes(search.toLowerCase()) || email.includes(search.toLowerCase())
+    })
+
+    const statusColor = (status: string) => {
+        switch (status) {
+            case 'approved': return 'success'
+            case 'rejected': return 'destructive'
+            case 'interview_scheduled': return 'warning'
+            default: return 'secondary'
+        }
+    }
 
     return (
         <div className="animate-fade-in space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Technician Management</h1>
-                <p className="text-muted-foreground">Review and manage technician applications</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold">Technician Management</h1>
+                    <p className="text-muted-foreground">Review and manage technician applications</p>
+                </div>
             </div>
 
-            {/* Search */}
-            <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search technicians..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-1 rounded-xl bg-muted p-1">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={cn(
-                            'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all',
-                            activeTab === tab.key ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                        )}
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        className="pl-10"
+                        placeholder="Search by name or email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                {['', 'pending', 'approved', 'rejected', 'interview_scheduled'].map((status) => (
+                    <Button
+                        key={status}
+                        variant={filter === status ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilter(status)}
                     >
-                        {tab.label}
-                        <span className={cn(
-                            'rounded-full px-2 py-0.5 text-xs',
-                            activeTab === tab.key
-                                ? tab.key === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-primary/10 text-primary'
-                                : 'bg-muted-foreground/10'
-                        )}>{tab.count}</span>
-                    </button>
+                        {status ? status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'All'}
+                    </Button>
                 ))}
             </div>
 
-            {/* List */}
-            <div className="space-y-3">
-                {techs.map((tech) => (
-                    <Card key={tech.id} className="border-0 shadow-card">
-                        <CardContent className="p-5">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-12 w-12">
-                                        <AvatarFallback className="bg-primary/10 text-primary">
-                                            {tech.name.split(' ').map((n) => n[0]).join('')}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-semibold">{tech.name}</p>
-                                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                            <Badge variant="secondary" className="text-[10px]">{tech.skill}</Badge>
-                                            <span>{tech.phone}</span>
-                                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{tech.submitted}</span>
+            {loading ? (
+                <div className="flex h-40 items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredApps.length === 0 ? (
+                <Card className="border-0 shadow-card">
+                    <CardContent className="py-12 text-center">
+                        <Users className="mx-auto h-12 w-12 text-muted-foreground/30 mb-3" />
+                        <p className="text-muted-foreground">No technician applications found</p>
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="space-y-4">
+                    {filteredApps.map((app) => (
+                        <Card key={app.id} className="border-0 shadow-card">
+                            <CardContent className="p-6">
+                                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                    <div className="space-y-3 flex-1">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
+                                                {app.users?.full_name?.charAt(0) || '?'}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold">{app.users?.full_name || 'Unknown'}</p>
+                                                <p className="text-sm text-muted-foreground">{app.users?.email} · {app.users?.phone}</p>
+                                            </div>
+                                            <Badge variant={statusColor(app.approval_status) as any} className="capitalize ml-2">
+                                                {app.approval_status?.replace('_', ' ')}
+                                            </Badge>
                                         </div>
-                                        {'rating' in tech && (
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                ⭐ {(tech as any).rating} · {(tech as any).jobs} jobs completed
-                                            </p>
+
+                                        <div className="grid gap-2 text-sm sm:grid-cols-3">
+                                            <div>
+                                                <span className="text-muted-foreground">Aadhaar:</span>{' '}
+                                                <span className="font-medium">{app.aadhar_number || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground">PAN:</span>{' '}
+                                                <span className="font-medium">{app.pan_number || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground">Location:</span>{' '}
+                                                <span className="font-medium">{app.city || '—'}, {app.state || '—'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-2 text-sm sm:grid-cols-3">
+                                            <div>
+                                                <span className="text-muted-foreground">Bank:</span>{' '}
+                                                <span className="font-medium">{app.bank_account_holder_name || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground">A/C:</span>{' '}
+                                                <span className="font-medium">{app.bank_account_number || '—'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground">IFSC:</span>{' '}
+                                                <span className="font-medium">{app.bank_ifsc_code || '—'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <Clock className="h-3 w-3" />
+                                            Applied: {new Date(app.created_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 shrink-0">
+                                        {app.approval_status === 'pending' && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleAction(app.id, 'interview_scheduled')}
+                                                    disabled={updatingId === app.id}
+                                                >
+                                                    <CalendarDays className="h-4 w-4 mr-1" /> Schedule Interview
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                                    onClick={() => handleAction(app.id, 'approved')}
+                                                    disabled={updatingId === app.id}
+                                                >
+                                                    <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() => handleAction(app.id, 'rejected')}
+                                                    disabled={updatingId === app.id}
+                                                >
+                                                    <XCircle className="h-4 w-4 mr-1" /> Reject
+                                                </Button>
+                                            </>
                                         )}
-                                        {'reason' in tech && (
-                                            <p className="mt-1 text-xs text-red-500">Reason: {(tech as any).reason}</p>
+                                        {app.approval_status === 'interview_scheduled' && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                                    onClick={() => handleAction(app.id, 'approved')}
+                                                    disabled={updatingId === app.id}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() => handleAction(app.id, 'rejected')}
+                                                    disabled={updatingId === app.id}
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" className="gap-1.5">
-                                        <Eye className="h-3.5 w-3.5" /> View
-                                    </Button>
-                                    {activeTab === 'pending' && (
-                                        <>
-                                            <Button variant="destructive" size="sm" className="gap-1.5">
-                                                <XCircle className="h-3.5 w-3.5" /> Reject
-                                            </Button>
-                                            <Button size="sm" className="gap-1.5">
-                                                <CheckCircle2 className="h-3.5 w-3.5" /> Approve
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {techs.length === 0 && (
-                <div className="py-16 text-center">
-                    <p className="text-lg font-medium text-muted-foreground">No technicians found</p>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             )}
         </div>

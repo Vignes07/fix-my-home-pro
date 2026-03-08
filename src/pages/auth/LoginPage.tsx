@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Phone, ArrowRight } from 'lucide-react'
+import { Mail, Lock, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,7 +14,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 
 export default function LoginPage() {
     const navigate = useNavigate()
-    const { setPhone } = useAuthStore()
+    const { setEmail, login } = useAuthStore()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -24,19 +24,34 @@ export default function LoginPage() {
         formState: { errors },
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
-        defaultValues: { phone: '' },
+        defaultValues: { email: '', password: '' },
     })
 
     const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true)
         setError(null)
         try {
-            const phone = data.phone.startsWith('+91') ? data.phone : `+91${data.phone}`
-            await authService.sendOtp(phone)
-            setPhone(phone)
-            navigate('/verify-otp')
+            const result = await authService.signIn(data.email, data.password)
+            // result contains { user, session } from Supabase
+            if (result.user && result.session) {
+                // Map Supabase user to our User type and call login()
+                const appUser = {
+                    id: result.user.id,
+                    email: result.user.email || data.email,
+                    full_name: result.user.user_metadata?.full_name || '',
+                    phone: result.user.user_metadata?.phone || result.user.phone || '',
+                    user_type: result.user.user_metadata?.user_type || 'customer',
+                    is_active: true,
+                    profile_photo_url: result.user.user_metadata?.profile_photo_url || '',
+                    created_at: result.user.created_at || '',
+                    updated_at: result.user.updated_at || '',
+                }
+                login(appUser as any, result.session)
+            }
+            setEmail(data.email)
+            navigate('/')
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to send OTP')
+            setError(err instanceof Error ? err.message : 'Failed to sign in')
         } finally {
             setIsLoading(false)
         }
@@ -59,30 +74,46 @@ export default function LoginPage() {
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl">Welcome Back</CardTitle>
                         <CardDescription>
-                            Enter your phone number to sign in
+                            Enter your email and password to sign in
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Phone Number</Label>
+                                <Label htmlFor="email">Email Address</Label>
                                 <div className="relative">
-                                    <div className="absolute left-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-sm text-muted-foreground">
-                                        <Phone className="h-4 w-4" />
-                                        <span>+91</span>
-                                        <div className="h-5 w-px bg-border" />
+                                    <div className="absolute left-3 top-1/2 flex -translate-y-1/2 items-center text-muted-foreground">
+                                        <Mail className="h-4 w-4" />
                                     </div>
                                     <Input
-                                        id="phone"
-                                        type="tel"
-                                        placeholder="Enter your phone number"
-                                        className="pl-[5.5rem]"
-                                        maxLength={10}
-                                        {...register('phone')}
+                                        id="email"
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        className="pl-10"
+                                        {...register('email')}
                                     />
                                 </div>
-                                {errors.phone && (
-                                    <p className="text-sm text-destructive">{errors.phone.message}</p>
+                                {errors.email && (
+                                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 flex -translate-y-1/2 items-center text-muted-foreground">
+                                        <Lock className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Enter your password"
+                                        className="pl-10"
+                                        {...register('password')}
+                                    />
+                                </div>
+                                {errors.password && (
+                                    <p className="text-sm text-destructive">{errors.password.message}</p>
                                 )}
                             </div>
 
@@ -94,7 +125,7 @@ export default function LoginPage() {
 
                             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                                 {isLoading ? (
-                                    <span className="animate-pulse-soft">Sending OTP...</span>
+                                    <span className="animate-pulse-soft">Signing in...</span>
                                 ) : (
                                     <>
                                         Continue

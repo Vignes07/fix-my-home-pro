@@ -2,27 +2,27 @@ import { supabase } from './supabase'
 
 export const authService = {
     /**
-     * Send OTP to phone number
+     * Sign In with Email/Password
      */
-    async sendOtp(phone: string) {
-        const { data, error } = await supabase.auth.signInWithOtp({
-            phone,
-            options: {
-                channel: 'sms',
-            },
+    async signIn(email: string, password: string) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
         })
         if (error) throw error
         return data
     },
 
     /**
-     * Verify OTP
+     * Sign Up
      */
-    async verifyOtp(phone: string, token: string) {
-        const { data, error } = await supabase.auth.verifyOtp({
-            phone,
-            token,
-            type: 'sms',
+    async signUp(email: string, password: string, metadata: { full_name: string, phone: string, user_type: string }) {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: metadata,
+            },
         })
         if (error) throw error
         return data

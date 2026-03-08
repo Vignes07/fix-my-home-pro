@@ -9,13 +9,13 @@ interface AuthStore {
     session: Session | null
     isAuthenticated: boolean
     userType: UserType | null
-    phone: string
+    email: string
     isLoading: boolean
 
     // Actions
     setUser: (user: User | null) => void
     setSession: (session: Session | null) => void
-    setPhone: (phone: string) => void
+    setEmail: (email: string) => void
     setLoading: (loading: boolean) => void
     login: (user: User, session: Session) => void
     logout: () => void
@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthStore>()(
             session: null,
             isAuthenticated: false,
             userType: null,
-            phone: '',
+            email: '',
             isLoading: false,
 
             setUser: (user) =>
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthStore>()(
             setSession: (session) =>
                 set({ session, isAuthenticated: !!session }),
 
-            setPhone: (phone) => set({ phone }),
+            setEmail: (email) => set({ email }),
 
             setLoading: (isLoading) => set({ isLoading }),
 
@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthStore>()(
                     session: null,
                     isAuthenticated: false,
                     userType: null,
-                    phone: '',
+                    email: '',
                 }),
         }),
         {

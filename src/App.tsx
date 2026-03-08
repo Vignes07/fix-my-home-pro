@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ScrollToTop } from '@/components/common/ScrollToTop'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
 import { RootLayout } from '@/components/layout/RootLayout'
@@ -14,7 +15,6 @@ const PageLoader = () => (
 
 // Auth Pages (Lazy Loaded)
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
-const VerifyOtpPage = lazy(() => import('@/pages/auth/VerifyOtpPage'))
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'))
 const TestDataViewer = lazy(() => import('@/pages/admin/TestDataViewer'))
 
@@ -50,11 +50,11 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Auth Routes (no header/footer) */}
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/test/data" element={<TestDataViewer />} />
 

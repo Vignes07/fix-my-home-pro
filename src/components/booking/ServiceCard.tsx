@@ -39,7 +39,7 @@ export function ServiceCard({
                                     {categoryName}
                                 </Badge>
                             )}
-                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            <h3 className="text-[24px] font-semibold text-foreground group-hover:text-primary transition-colors">
                                 {name}
                             </h3>
                             {description && (
