@@ -42,10 +42,10 @@ export function Header() {
         <header className="sticky top-0 z-50 w-full">
             {/* Main navbar */}
             <div className="w-full bg-[rgba(3,19,44,0.9)] backdrop-blur-sm">
-                <div className="mx-auto flex h-[90px] items-center justify-between px-14">
+                <div className="mx-auto flex h-[70px] md:h-[90px] items-center justify-between px-4 md:px-14">
                     {/* Logo */}
                     <Link to="/" className="flex items-center">
-                        <span className="font-heading text-[42px] font-bold capitalize leading-[59px] text-white">
+                        <span className="font-heading text-[28px] md:text-[42px] font-bold capitalize leading-[40px] md:leading-[59px] text-white">
                             FIXPRO
                         </span>
                     </Link>

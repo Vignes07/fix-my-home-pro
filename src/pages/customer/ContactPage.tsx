@@ -7,11 +7,11 @@ export default function ContactPage() {
     return (
         <div className="animate-fade-in">
             {/* Hero */}
-            <section className="relative h-[860px] w-full overflow-hidden">
+            <section className="relative h-[500px] md:h-[860px] w-full overflow-hidden">
                 <img src={imgContactHero} alt="Contact FixPro" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-[rgba(0,28,48,0.7)]" />
-                <div className="relative z-10 mx-auto max-w-[1440px] px-[100px] pt-[160px]">
-                    <h1 className="text-shadow-hero text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pt-[100px] md:pt-[160px]">
+                    <h1 className="text-shadow-hero text-[36px] md:text-[60px] lg:text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Get in Touch with FixPro
                     </h1>
                     <p className="mt-6 max-w-[560px] text-[20px] leading-[1.4] tracking-[-0.4px] text-white">
@@ -29,7 +29,7 @@ export default function ContactPage() {
             </section>
 
             {/* Contact Info + Form */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">Our Services</h2>
                 <div className="mt-10 grid grid-cols-1 gap-16 lg:grid-cols-2">
                     {/* Contact Details */}
@@ -104,7 +104,7 @@ export default function ContactPage() {
             </section>
 
             {/* Map placeholder */}
-            <section className="mx-auto max-w-[1440px] px-[100px] pb-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pb-16">
                 <div className="h-[400px] overflow-hidden rounded-[15px] bg-[#e5e7eb]">
                     <iframe
                         title="FixPro Location"
@@ -121,7 +121,7 @@ export default function ContactPage() {
 
             {/* Need Help */}
             <section className="bg-[#001c30] py-12">
-                <div className="mx-auto max-w-[1440px] px-[100px] text-center">
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] text-center">
                     <h2 className="text-[36px] font-bold text-white">Need Help?</h2>
                     <p className="mx-auto mt-4 max-w-[600px] text-[18px] text-white/80">
                         Our support team is available 24/7 to assist you with any questions or service needs.

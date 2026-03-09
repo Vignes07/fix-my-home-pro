@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/utils/cn'
 import { bookingService } from '@/services/booking.service'
+import { paymentService } from '@/services/payment.service'
+import { api } from '@/services/api'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useBookingStore } from '@/stores/useBookingStore'
 
@@ -55,6 +57,7 @@ export default function BookingPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'failed'>('idle')
 
     const handleNext = () => {
         setFieldErrors({}) // Reset previous errors
@@ -106,7 +109,7 @@ export default function BookingPage() {
                 customer_id: user?.id,
                 service_id: serviceId || undefined,
                 booking_date: selectedDate || new Date().toISOString().split('T')[0],
-                booking_time: selectedTime || 'ASAP',
+                booking_time: selectedTime || new Date().toTimeString().slice(0, 8),
                 booking_type: bookingType,
                 customer_address: fullAddress,
                 estimated_price: servicePrice ? Number(servicePrice) : undefined,
@@ -115,15 +118,73 @@ export default function BookingPage() {
             const result = res as any
             const newBookingId = result?.data?.data?.id || result?.data?.id || result?.id || 'new'
 
-            // Clear draft after successful booking
-            resetBookingFlow()
+            // DON'T reset draft yet — wait for payment to succeed
 
-            navigate(`/booking/${newBookingId}/payment`)
+            // Directly open Razorpay popup
+            try {
+                const orderData = await paymentService.createOrder(newBookingId)
+                await paymentService.openCheckout({
+                    order_id: orderData.order_id,
+                    amount: orderData.amount,
+                    booking_id: newBookingId,
+                    customerName: user?.full_name || (user as any)?.user_metadata?.full_name || '',
+                    customerEmail: user?.email || '',
+                    customerPhone: user?.phone || (user as any)?.user_metadata?.phone || '',
+                    onSuccess: async (response) => {
+                        try {
+                            await paymentService.verifyPayment({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                booking_id: newBookingId,
+                            })
+                            resetBookingFlow() // Clear draft only on success
+                            setPaymentStatus('success')
+                            setTimeout(() => navigate('/bookings'), 3000)
+                        } catch {
+                            setSubmitError('Payment verification failed. Please contact support.')
+                            setPaymentStatus('failed')
+                        }
+                        setIsSubmitting(false)
+                    },
+                    onFailure: async () => {
+                        // Payment cancelled — cancel the booking so it doesn't appear as booked
+                        try {
+                            await api.patch(`/bookings/${newBookingId}/status`, { status: 'cancelled' })
+                        } catch { /* ignore */ }
+                        setIsSubmitting(false)
+                        setSubmitError('Payment was cancelled. Booking has been cancelled.')
+                    },
+                })
+            } catch (payErr) {
+                // If Razorpay order creation fails, cancel the booking
+                console.error('Payment init failed:', payErr)
+                try {
+                    await api.patch(`/bookings/${newBookingId}/status`, { status: 'cancelled' })
+                } catch { /* ignore */ }
+                setIsSubmitting(false)
+                setSubmitError('Could not start payment. Please try again.')
+            }
         } catch (err) {
             setSubmitError(err instanceof Error ? err.message : 'Failed to create booking')
-        } finally {
             setIsSubmitting(false)
         }
+    }
+
+    // Payment Success Screen
+    if (paymentStatus === 'success') {
+        return (
+            <div className="mx-auto max-w-lg px-4 py-16 sm:px-6 lg:px-8 animate-fade-in text-center">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100">
+                    <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+                </div>
+                <h1 className="mb-2 text-2xl font-bold text-emerald-700">Payment Successful!</h1>
+                <p className="text-muted-foreground mb-4">
+                    Your booking for <strong>{serviceName}</strong> has been confirmed.
+                </p>
+                <p className="text-sm text-muted-foreground">Redirecting to your bookings...</p>
+            </div>
+        )
     }
 
     return (
@@ -393,9 +454,9 @@ export default function BookingPage() {
                 {currentStep === steps.length - 1 ? (
                     <Button onClick={handleSubmitBooking} className="gap-2" disabled={isSubmitting}>
                         {isSubmitting ? (
-                            <><Loader2 className="h-4 w-4 animate-spin" /> Creating Booking...</>
+                            <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
                         ) : (
-                            <>Proceed to Payment <ArrowRight className="h-4 w-4" /></>
+                            <>Confirm & Pay <ArrowRight className="h-4 w-4" /></>
                         )}
                     </Button>
                 ) : (

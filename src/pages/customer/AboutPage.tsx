@@ -49,11 +49,11 @@ export default function AboutPage() {
     return (
         <div className="animate-fade-in">
             {/* Hero */}
-            <section className="relative h-[860px] w-full overflow-hidden">
+            <section className="relative h-[500px] md:h-[860px] w-full overflow-hidden">
                 <img src={imgAboutHero} alt="About FixPro" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-[rgba(0,28,48,0.7)]" />
-                <div className="relative z-10 mx-auto max-w-[1440px] px-[100px] pt-[160px]">
-                    <h1 className="text-shadow-hero text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pt-[100px] md:pt-[160px]">
+                    <h1 className="text-shadow-hero text-[36px] md:text-[60px] lg:text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Complete Home<br />Solutions, One Platform
                     </h1>
                     <p className="mt-6 max-w-[605px] text-[20px] leading-[1.4] tracking-[-0.4px] text-white">
@@ -74,7 +74,7 @@ export default function AboutPage() {
             </section>
 
             {/* Who We Are */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">Who We Are</h2>
                 <div className="mt-4 flex gap-16">
                     <div className="max-w-[612px]">
@@ -103,7 +103,7 @@ export default function AboutPage() {
 
             {/* Mission & Vision */}
             <section className="bg-[#001c30] py-20">
-                <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-6 px-[100px] md:grid-cols-2">
+                <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-6 px-4 sm:px-8 lg:px-[100px] md:grid-cols-2">
                     <div className="relative h-[265px] overflow-hidden rounded-[30px]">
                         <img src={imgMission} alt="Our Mission" className="h-full w-full object-cover" />
                         <div className="absolute inset-0 bg-black/40" />
@@ -128,7 +128,7 @@ export default function AboutPage() {
             </section>
 
             {/* What We Do */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">What We Do</h2>
                 <p className="mt-2 text-[18px] text-[#0f172a]">We offer a wide range of residential services including:</p>
                 <div className="mt-6 flex flex-col gap-3">
@@ -142,7 +142,7 @@ export default function AboutPage() {
             </section>
 
             {/* Why Choose FixPro */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">Why Choose FixPro</h2>
                 <div className="mt-6 flex flex-col gap-3">
                     {whyChoose.map((item) => (
@@ -153,7 +153,7 @@ export default function AboutPage() {
 
             {/* Our Commitment */}
             <section className="bg-[#001c30] py-12">
-                <div className="mx-auto max-w-[1440px] px-[100px] text-center">
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] text-center">
                     <h2 className="text-[36px] font-medium text-white">Our Commitment</h2>
                     <p className="mx-auto mt-4 max-w-[1008px] text-[18px] leading-[1.6] text-white/80">
                         At FixPro, customer satisfaction and safety are our top priorities. We focus on quality service, reliability, and building long-term trust with every home we serve.
@@ -183,7 +183,7 @@ export default function AboutPage() {
             </section>
 
             {/* Testimonials */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-center text-[40px] font-bold capitalize tracking-[-0.8px] text-[#03132c]">
                     feedback from our valued clients
                 </h2>

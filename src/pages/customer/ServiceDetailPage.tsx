@@ -1,41 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CheckCircle2, Clock, MapPin, Shield, Star, Check, Plus, UploadCloud } from 'lucide-react'
+import { CheckCircle2, Plus, Check, Shield, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'
 import { api } from '@/services/api'
 import { apiCache } from '@/utils/cache'
-import { useAuthStore } from '@/stores/useAuthStore'
-import { bookingService } from '@/services/booking.service'
-import type { Service } from '@/types/service.types'
+import type { Service, ServiceOption } from '@/types/service.types'
 
 export default function ServiceDetailPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { user, session } = useAuthStore()
 
     const [service, setService] = useState<Service | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-
-    // Form State
     const [selectedOptions, setSelectedOptions] = useState<string[]>([])
-    const [fullName, setFullName] = useState(user?.full_name || '')
-    const [phone, setPhone] = useState('')
-    const [email, setEmail] = useState(user?.email || '')
-
-    const [address, setAddress] = useState('')
-    const [city, setCity] = useState('')
-    const [pincode, setPincode] = useState('')
-
-    const [selectedDate, setSelectedDate] = useState('')
-    const [timeSlot, setTimeSlot] = useState('')
-    const [problemDetails, setProblemDetails] = useState('')
 
     useEffect(() => {
         const fetchServiceDetail = async () => {
@@ -73,18 +54,16 @@ export default function ServiceDetailPage() {
         'Safety verification'
     ]
 
-    const optionsList = service.service_options?.length ? service.service_options : [
-        { id: 'dummy-1', service_id: service.id, name: 'Standard Service', price: basePrice } as import('@/types/service.types').ServiceOption
+    const optionsList: ServiceOption[] = service.service_options?.length ? service.service_options : [
+        { id: 'dummy-1', service_id: service.id, name: 'Standard Service', price: basePrice } as ServiceOption
     ]
 
-    // Calculate total based strictly on selected options
     const totalSelectedCost = selectedOptions.length > 0
         ? optionsList
             .filter(opt => selectedOptions.includes(opt.id))
             .reduce((sum, opt) => sum + Number(opt.price), 0)
         : 0;
 
-    // Only add visit charge if they have actually selected something
     const displayTotal = selectedOptions.length > 0 ? (totalSelectedCost + visitCharge) : 0;
 
     const toggleOption = (optId: string) => {
@@ -93,34 +72,18 @@ export default function ServiceDetailPage() {
         )
     }
 
-    const handleConfirmBooking = async () => {
-        if (!address || !city || !pincode || !selectedDate || !timeSlot) {
-            alert('Please fill in all required fields (Address, City, Pincode, Date, Time Slot)');
-            return;
+    const handleProceedToBooking = () => {
+        if (selectedOptions.length === 0) {
+            alert('Please select at least one service type')
+            return
         }
-
-        setIsSubmitting(true)
-        try {
-            const token = session?.access_token || ''
-            const res = await bookingService.createBooking({
-                customer_id: user?.id,
-                service_id: service.id,
-                booking_date: selectedDate,
-                booking_time: timeSlot,
-                booking_type: 'scheduled',
-                customer_address: `${address}, ${city}, ${pincode}`,
-                estimated_price: displayTotal,
-            }, token)
-
-            const result = res as any
-            const newBookingId = result?.data?.data?.id || result?.data?.id || result?.id || 'new'
-            navigate(`/booking/${newBookingId}/payment`)
-        } catch (err) {
-            console.error(err)
-            alert('Failed to confirm booking');
-        } finally {
-            setIsSubmitting(false)
-        }
+        // Navigate to booking page with service info as query params
+        const params = new URLSearchParams({
+            service_id: service.id,
+            service_name: service.name,
+            price: String(displayTotal),
+        })
+        navigate(`/booking/new?${params.toString()}`)
     }
 
     return (
@@ -142,10 +105,10 @@ export default function ServiceDetailPage() {
             </div>
 
             <div className="grid lg:grid-cols-[1fr_400px] gap-12">
-                {/* Left Column - Details & Forms */}
+                {/* Left Column - Details */}
                 <div className="space-y-12">
 
-                    {/* Includes & Metdata */}
+                    {/* Includes & Metadata */}
                     <div className="grid md:grid-cols-2 gap-8 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                         <div>
                             <h3 className="text-xl font-bold mb-4 font-['Inter']">Includes</h3>
@@ -174,7 +137,7 @@ export default function ServiceDetailPage() {
                     <div>
                         <h2 className="text-3xl font-bold mb-6 font-['Lato']">Select Service Type</h2>
                         <div className="grid gap-4">
-                            {optionsList.map((opt: import('@/types/service.types').ServiceOption) => {
+                            {optionsList.map((opt: ServiceOption) => {
                                 const isSelected = selectedOptions.includes(opt.id)
                                 return (
                                     <div
@@ -199,131 +162,6 @@ export default function ServiceDetailPage() {
                                     </div>
                                 )
                             })}
-                        </div>
-                    </div>
-
-                    <Separator className="bg-slate-200" />
-
-                    {/* Customer Details */}
-                    <div>
-                        <h2 className="text-3xl font-bold mb-6 font-['Lato']">Customer Details</h2>
-                        <div className="space-y-4">
-                            <Input
-                                placeholder="Full Name"
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={fullName}
-                                onChange={e => setFullName(e.target.value)}
-                            />
-                            <div className="flex gap-4">
-                                <div className="flex items-center h-16 px-4 bg-zinc-100/80 rounded-2xl text-slate-500 font-medium border border-transparent">
-                                    +91 |
-                                </div>
-                                <Input
-                                    placeholder="Phone Number"
-                                    className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                    value={phone}
-                                    onChange={e => setPhone(e.target.value)}
-                                />
-                            </div>
-                            <Input
-                                placeholder="Email (optional)"
-                                type="email"
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Service Address */}
-                    <div>
-                        <h2 className="text-3xl font-bold mb-6 font-['Lato']">Service Address</h2>
-                        <div className="space-y-4">
-                            <Input
-                                placeholder="Address line (House No, Street Area)"
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={address}
-                                onChange={e => setAddress(e.target.value)}
-                            />
-                            <Input
-                                placeholder="City"
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={city}
-                                onChange={e => setCity(e.target.value)}
-                            />
-                            <Input
-                                placeholder="Pincode"
-                                maxLength={6}
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={pincode}
-                                onChange={e => setPincode(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Schedule Service */}
-                    <div>
-                        <h2 className="text-3xl font-bold mb-6 font-['Lato']">Schedule Service</h2>
-                        <div className="space-y-4">
-                            <Label className="text-lg font-bold ml-2">Date</Label>
-                            <Input
-                                type="date"
-                                className="h-16 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white"
-                                value={selectedDate}
-                                onChange={e => setSelectedDate(e.target.value)}
-                                min={new Date().toISOString().split('T')[0]}
-                            />
-                            <Label className="text-lg font-bold ml-2 mt-4 block">Select Preferred Time</Label>
-                            <div className="grid grid-cols-3 gap-3 pt-2">
-                                {[
-                                    { label: '09:00 AM', value: '09:00:00' },
-                                    { label: '10:00 AM', value: '10:00:00' },
-                                    { label: '11:00 AM', value: '11:00:00' },
-                                    { label: '12:00 PM', value: '12:00:00' },
-                                    { label: '01:00 PM', value: '13:00:00' },
-                                    { label: '02:00 PM', value: '14:00:00' },
-                                    { label: '03:00 PM', value: '15:00:00' },
-                                    { label: '04:00 PM', value: '16:00:00' },
-                                    { label: '05:00 PM', value: '17:00:00' },
-                                    { label: '06:00 PM', value: '18:00:00' },
-                                    { label: '07:00 PM', value: '19:00:00' }
-                                ].map(slot => (
-                                    <Button
-                                        key={slot.value}
-                                        type="button"
-                                        variant={timeSlot === slot.value ? 'default' : 'outline'}
-                                        className={cn(
-                                            "h-12 text-sm md:text-md font-bold rounded-2xl transition-all",
-                                            timeSlot === slot.value ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-zinc-100/80 border-transparent text-slate-700 hover:bg-zinc-200"
-                                        )}
-                                        onClick={() => setTimeSlot(slot.value)}
-                                    >
-                                        {slot.label}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Service Details */}
-                    <div>
-                        <h2 className="text-3xl font-bold mb-6 font-['Lato']">Service Details</h2>
-                        <div className="space-y-4">
-                            <Label className="text-lg font-bold ml-2">Describe Your Problem</Label>
-                            <textarea
-                                placeholder="E.g. The AC makes a loud noise after 10 mins..."
-                                className="w-full h-32 p-4 text-lg rounded-2xl bg-zinc-100/80 border-transparent focus-visible:ring-primary focus-visible:bg-white resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-                                value={problemDetails}
-                                onChange={e => setProblemDetails(e.target.value)}
-                            />
-                            <div className="flex items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer">
-                                <div className="text-center">
-                                    <p className="text-lg font-medium text-slate-700 flex justify-center items-center gap-2">
-                                        <UploadCloud className="h-5 w-5" /> Attach Photo / Add Photo
-                                    </p>
-                                    <p className="text-xs text-slate-400 mt-1">Accepted file types: JPG, PNG. Max size: 5MB</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -360,10 +198,10 @@ export default function ServiceDetailPage() {
                                 <Button
                                     size="lg"
                                     className="w-full h-16 rounded-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 text-xl font-bold drop-shadow-md"
-                                    onClick={handleConfirmBooking}
-                                    disabled={isSubmitting}
+                                    onClick={handleProceedToBooking}
+                                    disabled={selectedOptions.length === 0}
                                 >
-                                    {isSubmitting ? "Processing..." : "Confirm Booking"}
+                                    Proceed to Booking
                                 </Button>
                             </CardContent>
                         </Card>

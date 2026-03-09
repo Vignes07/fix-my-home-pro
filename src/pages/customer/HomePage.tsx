@@ -191,14 +191,14 @@ export default function HomePage() {
     return (
         <div className="animate-fade-in">
             {/* ====== HERO SECTION ====== */}
-            <section className="relative h-[860px] w-full overflow-hidden">
+            <section className="relative h-[500px] md:h-[860px] w-full overflow-hidden">
                 <img
                     src={heroImg}
                     alt="Professional home service technicians"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-                <div className="relative z-10 mx-auto max-w-[1440px] px-[100px] pt-[160px]">
+                <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pt-[100px] md:pt-[160px]">
                     <h1 className="text-shadow-hero text-[42px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Fix Your Home.<br />
                         Fast. Safe. Reliable.
@@ -206,10 +206,10 @@ export default function HomePage() {
                     <p className="mt-6 max-w-[560px] text-[17px] leading-[1.4] tracking-[-0.4px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Book trusted and verified technicians for electrical, plumbing, AC, cleaning, and home maintenance — all in one place.
                     </p>
-                    <div className="mt-10 flex items-center gap-4">
+                    <div className="mt-6 md:mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <Button
                             size="lg"
-                            className="rounded-[40px] bg-[#facc15] px-10 py-7 text-[20px] font-semibold tracking-[-0.4px] text-black hover:bg-[#e5b800]"
+                            className="rounded-[40px] bg-[#facc15] px-6 md:px-10 py-5 md:py-7 text-[16px] md:text-[20px] font-semibold tracking-[-0.4px] text-black hover:bg-[#e5b800]"
                             onClick={() => navigate('/services')}
                         >
                             Book Service
@@ -217,20 +217,20 @@ export default function HomePage() {
                         <Button
                             size="lg"
                             variant="secondary"
-                            className="rounded-[40px] bg-[#d9d9d9] px-10 py-7 text-[20px] font-semibold tracking-[-0.4px] text-black hover:bg-[#c0c0c0]"
+                            className="rounded-[40px] bg-[#d9d9d9] px-6 md:px-10 py-5 md:py-7 text-[16px] md:text-[20px] font-semibold tracking-[-0.4px] text-black hover:bg-[#c0c0c0]"
                             onClick={() => navigate('/services')}
                         >
                             Explore Services
                         </Button>
                     </div>
-                    <p className="mt-6 text-[20px] font-medium tracking-[-0.4px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <p className="mt-4 md:mt-6 text-[14px] md:text-[20px] font-medium tracking-[-0.4px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         ✔ Verified Technicians • ✔ Transparent Pricing • ✔ Fast Service
                     </p>
                 </div>
             </section>
 
             {/* ====== OUR EXPERT SERVICES ====== */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Our Expert Services
                 </h2>
@@ -276,7 +276,7 @@ export default function HomePage() {
             </section>
 
             {/* ====== BANNER: Complete Home Maintenance + Instant Help ====== */}
-            <section className="mx-auto max-w-[1440px] px-[100px] pb-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pb-16">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="relative h-[265px] overflow-hidden rounded-[30px]">
                         <img src={imgHomeMaintenance} alt="Complete Home Maintenance" className="h-full w-full object-cover" />
@@ -318,7 +318,7 @@ export default function HomePage() {
             {isLoading ? (
                 <div className="py-20 text-center animate-pulse">Loading Services from Database...</div>
             ) : categories.length > 0 ? categories.map((cat, catIdx) => (
-                <section key={cat.id || cat.name} className="mx-auto max-w-[1440px] px-[100px] pb-12">
+                <section key={cat.id || cat.name} className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pb-12">
                     <div className="flex items-center justify-between">
                         <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                             {cat.name}
@@ -352,7 +352,7 @@ export default function HomePage() {
             )}
 
             {/* ====== MORE HOME SOLUTIONS ====== */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[32px] font-medium tracking-[-0.72px] text-[#0f172a]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     More Home Solutions
                 </h2>
@@ -471,7 +471,7 @@ export default function HomePage() {
             </section>
 
             {/* ====== TESTIMONIALS ====== */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-center text-[32px] font-bold capitalize tracking-[-0.8px] text-[#03132c]" style={{ fontFamily: "'Inter', sans-serif" }}>
                     feedback from our valued clients
                 </h2>

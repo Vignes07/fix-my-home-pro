@@ -43,11 +43,11 @@ export default function JoinUsPage() {
     return (
         <div className="animate-fade-in">
             {/* Hero */}
-            <section className="relative h-[860px] w-full overflow-hidden">
+            <section className="relative h-[500px] md:h-[860px] w-full overflow-hidden">
                 <img src={imgJoinHero} alt="Join FixPro" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-[rgba(0,28,48,0.7)]" />
-                <div className="relative z-10 mx-auto max-w-[1440px] px-[100px] pt-[160px]">
-                    <h1 className="text-shadow-hero text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pt-[100px] md:pt-[160px]">
+                    <h1 className="text-shadow-hero text-[36px] md:text-[60px] lg:text-[85px] font-bold leading-[1.1] tracking-[-1.7px] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Build Your Future<br />with FixPro
                     </h1>
                     <p className="mt-6 max-w-[560px] text-[20px] leading-[1.4] tracking-[-0.4px] text-white">
@@ -65,7 +65,7 @@ export default function JoinUsPage() {
             </section>
 
             {/* Rank Based Services */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">Rank Based Services</h2>
                 <p className="mt-2 text-[18px] text-[#454545]">
                     Our technicians are ranked based on experience, skill level, and customer reviews.
@@ -73,7 +73,7 @@ export default function JoinUsPage() {
             </section>
 
             {/* Why Join FixPro */}
-            <section className="mx-auto max-w-[1440px] px-[100px] pb-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] pb-16">
                 <h2 className="text-[36px] font-medium tracking-[-0.72px] text-[#0f172a]">Why Join FixPro?</h2>
                 <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {benefits.map((b) => (
@@ -87,7 +87,7 @@ export default function JoinUsPage() {
 
             {/* How to join */}
             <section className="bg-[#001c30] py-16">
-                <div className="mx-auto max-w-[1440px] px-[100px]">
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px]">
                     <h2 className="text-center text-[36px] font-medium text-white">How to Join?</h2>
                     <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                         {steps.map((s) => (
@@ -122,7 +122,7 @@ export default function JoinUsPage() {
             </section>
 
             {/* Testimonials */}
-            <section className="mx-auto max-w-[1440px] px-[100px] py-16">
+            <section className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px] py-16">
                 <h2 className="text-center text-[40px] font-bold capitalize tracking-[-0.8px] text-[#03132c]">
                     feedback from our valued clients
                 </h2>

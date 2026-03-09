@@ -21,7 +21,7 @@ const services = [
 export function Footer() {
     return (
         <footer className="bg-black py-[80px]">
-            <div className="mx-auto max-w-[1440px] px-[100px]">
+            <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px]">
                 <div className="flex flex-col gap-12 lg:flex-row lg:gap-[162px]">
                     {/* Brand column */}
                     <div className="flex flex-col gap-10 lg:w-[408px]">
@@ -67,7 +67,7 @@ export function Footer() {
                             <h4 className="font-display text-[24px] font-semibold leading-[35px] text-white">
                                 Quick Links
                             </h4>
-                            <ul className="mt-[59px] flex flex-col gap-4">
+                            <ul className="mt-6 lg:mt-[59px] flex flex-col gap-4">
                                 {quickLinks.map((link) => (
                                     <li key={link.path}>
                                         <Link
@@ -86,7 +86,7 @@ export function Footer() {
                             <h4 className="font-display text-[24px] font-semibold leading-[35px] text-white">
                                 Services
                             </h4>
-                            <ul className="mt-[59px] flex flex-col gap-4">
+                            <ul className="mt-6 lg:mt-[59px] flex flex-col gap-4">
                                 {services.map((s) => (
                                     <li key={s}>
                                         <Link
@@ -105,7 +105,7 @@ export function Footer() {
                             <h4 className="font-display text-[24px] font-semibold leading-[35px] text-white">
                                 Contact Us
                             </h4>
-                            <div className="mt-[59px] flex flex-col gap-[16px]">
+                            <div className="mt-6 lg:mt-[59px] flex flex-col gap-[16px]">
                                 <div className="flex items-start gap-[10px]">
                                     <MapPin className="mt-0.5 h-[25px] w-[25px] shrink-0 text-[#fafafa]" />
                                     <p className="font-body text-[16px] leading-[30px] text-[#fafafa]">
