@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { MapPin, CalendarDays, Clock, CheckCircle2, XCircle, Loader2, Briefcase } from 'lucide-react'
+import { JobCardSkeleton } from '@/components/common/skeletons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -67,11 +68,7 @@ export default function TechJobsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )
+        return <JobCardSkeleton />
     }
 
     return (

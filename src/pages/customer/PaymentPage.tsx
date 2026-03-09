@@ -8,6 +8,7 @@ import { paymentService } from '@/services/payment.service'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { api } from '@/services/api'
 import { cn } from '@/utils/cn'
+import { PaymentSkeleton } from '@/components/common/skeletons'
 
 export default function PaymentPage() {
     const { id: bookingId } = useParams<{ id: string }>()
@@ -105,11 +106,7 @@ export default function PaymentPage() {
     }
 
     if (loadingBooking) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )
+        return <PaymentSkeleton />
     }
 
     return (

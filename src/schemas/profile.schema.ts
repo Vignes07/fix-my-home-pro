@@ -13,6 +13,9 @@ export const profileSchema = z.object({
 })
 
 export const technicianKycSchema = z.object({
+    full_name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name is too long'),
+    phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits'),
+    email: z.string().email('Enter a valid email address').optional().or(z.literal('')),
     aadhar_number: z
         .string()
         .length(12, 'Aadhar number must be 12 digits')

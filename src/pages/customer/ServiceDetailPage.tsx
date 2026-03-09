@@ -9,6 +9,7 @@ import { formatPrice } from '@/utils/format'
 import { api } from '@/services/api'
 import { apiCache } from '@/utils/cache'
 import type { Service, ServiceOption } from '@/types/service.types'
+import { ServiceDetailSkeleton } from '@/components/common/skeletons'
 
 export default function ServiceDetailPage() {
     const { id } = useParams()
@@ -42,7 +43,7 @@ export default function ServiceDetailPage() {
         if (id) fetchServiceDetail()
     }, [id])
 
-    if (isLoading) return <div className="py-20 text-center animate-pulse">Loading Service Details...</div>
+    if (isLoading) return <ServiceDetailSkeleton />
     if (!service) return <div className="py-20 text-center text-red-500">Service not found</div>
 
     const basePrice = Number(service.base_price) || 349

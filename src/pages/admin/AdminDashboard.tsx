@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Users, CalendarCheck, DollarSign, TrendingUp, Clock, BarChart3, Loader2 } from 'lucide-react'
+import { Users, CalendarCheck, DollarSign, TrendingUp, Clock, BarChart3 } from 'lucide-react'
+import { DashboardStatsSkeleton } from '@/components/common/skeletons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -59,11 +60,7 @@ export default function AdminDashboard() {
     }
 
     if (loading) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )
+        return <DashboardStatsSkeleton />
     }
 
     const statCards = [

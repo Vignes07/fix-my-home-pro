@@ -80,7 +80,7 @@ export default function LoginPage() {
                 if (userType === 'admin') {
                     navigate('/admin')
                 } else if (userType === 'technician') {
-                    navigate('/technician/dashboard')
+                    navigate('/technician')
                 } else {
                     navigate('/')
                 }

@@ -52,23 +52,30 @@ export function Header() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden items-center gap-[35px] lg:flex">
-                        {navLinks.map((link) => {
-                            const isActive = location.pathname === link.path
-                            return (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    className={cn(
-                                        'font-heading text-[14px] font-semibold uppercase leading-6 tracking-[0.84px] transition-colors',
-                                        isActive
-                                            ? 'border-b-2 border-white py-[10px] text-white'
-                                            : 'text-white/75 hover:text-white'
-                                    )}
-                                >
-                                    {link.label}
-                                </Link>
-                            )
-                        })}
+                        {navLinks
+                            .filter(link => {
+                                if (user?.user_type === 'technician') {
+                                    return ['About Us', 'Contact'].includes(link.label);
+                                }
+                                return true;
+                            })
+                            .map((link) => {
+                                const isActive = location.pathname === link.path
+                                return (
+                                    <Link
+                                        key={link.path}
+                                        to={link.path}
+                                        className={cn(
+                                            'font-heading text-[14px] font-semibold uppercase leading-6 tracking-[0.84px] transition-colors',
+                                            isActive
+                                                ? 'border-b-2 border-white py-[10px] text-white'
+                                                : 'text-white/75 hover:text-white'
+                                        )}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                )
+                            })}
                     </nav>
 
                     {/* Right side buttons */}
@@ -103,14 +110,16 @@ export function Header() {
                                                 <User className="h-4 w-4" />
                                                 My Profile
                                             </Link>
-                                            <Link
-                                                to="/bookings"
-                                                onClick={() => setProfileOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                                            >
-                                                <CalendarCheck className="h-4 w-4" />
-                                                My Bookings
-                                            </Link>
+                                            {user?.user_type !== 'technician' && (
+                                                <Link
+                                                    to="/bookings"
+                                                    onClick={() => setProfileOpen(false)}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                                                >
+                                                    <CalendarCheck className="h-4 w-4" />
+                                                    My Bookings
+                                                </Link>
+                                            )}
                                         </div>
                                         <div className="border-t border-white/10 py-1">
                                             <button
@@ -164,24 +173,31 @@ export function Header() {
             {mobileMenuOpen && (
                 <div className="border-t border-white/10 bg-[rgba(3,19,44,0.95)] p-6 lg:hidden">
                     <nav className="flex flex-col gap-2">
-                        {navLinks.map((link) => {
-                            const isActive = location.pathname === link.path
-                            return (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={cn(
-                                        'rounded-lg px-4 py-3 font-heading text-[14px] font-semibold uppercase tracking-[0.84px] transition-colors',
-                                        isActive
-                                            ? 'bg-white/10 text-white'
-                                            : 'text-white/75 hover:bg-white/5 hover:text-white'
-                                    )}
-                                >
-                                    {link.label}
-                                </Link>
-                            )
-                        })}
+                        {navLinks
+                            .filter(link => {
+                                if (user?.user_type === 'technician') {
+                                    return ['About Us', 'Contact'].includes(link.label);
+                                }
+                                return true;
+                            })
+                            .map((link) => {
+                                const isActive = location.pathname === link.path
+                                return (
+                                    <Link
+                                        key={link.path}
+                                        to={link.path}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={cn(
+                                            'rounded-lg px-4 py-3 font-heading text-[14px] font-semibold uppercase tracking-[0.84px] transition-colors',
+                                            isActive
+                                                ? 'bg-white/10 text-white'
+                                                : 'text-white/75 hover:bg-white/5 hover:text-white'
+                                        )}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                )
+                            })}
                     </nav>
                     <div className="mt-4 flex flex-col gap-3">
                         {isAuthenticated ? (
@@ -193,13 +209,15 @@ export function Header() {
                                 >
                                     <User className="h-4 w-4" /> My Profile
                                 </Link>
-                                <Link
-                                    to="/bookings"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-white/75 hover:bg-white/5 hover:text-white"
-                                >
-                                    <CalendarCheck className="h-4 w-4" /> My Bookings
-                                </Link>
+                                {user?.user_type !== 'technician' && (
+                                    <Link
+                                        to="/bookings"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 rounded-lg px-4 py-3 text-white/75 hover:bg-white/5 hover:text-white"
+                                    >
+                                        <CalendarCheck className="h-4 w-4" /> My Bookings
+                                    </Link>
+                                )}
                                 <button
                                     onClick={() => { handleLogout(); setMobileMenuOpen(false) }}
                                     className="flex items-center gap-3 rounded-lg px-4 py-3 text-red-400 hover:bg-white/5"

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Search, Calendar, MapPin, Clock, Loader2 } from 'lucide-react'
+import { Search, Calendar, MapPin, Clock } from 'lucide-react'
+import { TableSkeleton } from '@/components/common/skeletons'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +25,7 @@ interface AdminBooking {
     customer_name: string
     customer_email: string
     technician_name: string
+    technician_id?: string | null
     booking_date: string
     booking_time: string
     status: BookingStatus
@@ -37,6 +39,12 @@ export default function AdminBookingsPage() {
     const [loading, setLoading] = useState(true)
     const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all')
     const [search, setSearch] = useState('')
+
+    const [reassignModalOpen, setReassignModalOpen] = useState(false)
+    const [selectedBookingForReassign, setSelectedBookingForReassign] = useState<string | null>(null)
+    const [availableTechs, setAvailableTechs] = useState<any[]>([])
+    const [selectedTechId, setSelectedTechId] = useState('')
+    const [reassigning, setReassigning] = useState(false)
 
     useEffect(() => {
         fetchBookings()
@@ -76,6 +84,36 @@ export default function AdminBookingsPage() {
             fetchBookings()
         } catch (err) {
             console.error('Failed to cancel:', err)
+        }
+    }
+
+    const openReassignModal = async (bookingId: string) => {
+        setSelectedBookingForReassign(bookingId)
+        setSelectedTechId('')
+        setReassignModalOpen(true)
+        try {
+            const res = await api.get('/technicians')
+            setAvailableTechs(res.data.data || [])
+        } catch (err) {
+            console.error('Failed to fetch technicians:', err)
+        }
+    }
+
+    const handleReassign = async () => {
+        if (!selectedBookingForReassign || !selectedTechId) return
+        setReassigning(true)
+        try {
+            await api.patch(`/bookings/admin/${selectedBookingForReassign}`, {
+                technician_id: selectedTechId,
+                status: 'technician_assigned'
+            })
+            setReassignModalOpen(false)
+            fetchBookings()
+        } catch (err) {
+            console.error('Failed to reassign:', err)
+            alert('Failed to reassign technician')
+        } finally {
+            setReassigning(false)
         }
     }
 
@@ -126,9 +164,7 @@ export default function AdminBookingsPage() {
             </div>
 
             {loading ? (
-                <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+                <TableSkeleton rows={8} cols={8} />
             ) : (
                 <>
                     {/* Bookings Table */}
@@ -192,6 +228,11 @@ export default function AdminBookingsPage() {
                                                                 Complete
                                                             </Button>
                                                         )}
+                                                        {['pending', 'accepted', 'technician_assigned'].includes(booking.status) && (
+                                                            <Button size="sm" variant="outline" className="text-xs" onClick={() => openReassignModal(booking.id)}>
+                                                                Reassign
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -208,6 +249,36 @@ export default function AdminBookingsPage() {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Reassign Modal */}
+            {reassignModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-sm rounded-xl bg-background p-6 shadow-2xl animate-fade-in">
+                        <h2 className="text-lg font-bold mb-4">Reassign Technician</h2>
+
+                        <div className="space-y-4 mb-6">
+                            <label className="block text-sm font-medium">Select Approved Technician</label>
+                            <select
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                value={selectedTechId}
+                                onChange={(e) => setSelectedTechId(e.target.value)}
+                            >
+                                <option value="">Select technician...</option>
+                                {availableTechs.map(tech => (
+                                    <option key={tech.id} value={tech.id}>{tech.users?.full_name} ({tech.city})</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Button variant="outline" className="flex-1" onClick={() => setReassignModalOpen(false)}>Cancel</Button>
+                            <Button className="flex-1" onClick={handleReassign} disabled={!selectedTechId || reassigning}>
+                                {reassigning ? 'Reassigning...' : 'Assign'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )

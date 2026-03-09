@@ -34,7 +34,7 @@ const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage'))
 
 // Technician Pages (Lazy Loaded)
 const TechnicianDashboard = lazy(() => import('@/pages/technician/TechnicianDashboard'))
-const TechRegistrationPage = lazy(() => import('@/pages/technician/TechRegistrationPage'))
+
 const TechJobsPage = lazy(() => import('@/pages/technician/TechJobsPage'))
 const TechJobDetailPage = lazy(() => import('@/pages/technician/TechJobDetailPage'))
 const TechEarningsPage = lazy(() => import('@/pages/technician/TechEarningsPage'))
@@ -45,6 +45,7 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 const AdminTechniciansPage = lazy(() => import('@/pages/admin/AdminTechniciansPage'))
 const AdminBookingsPage = lazy(() => import('@/pages/admin/AdminBookingsPage'))
 const AdminServicesPage = lazy(() => import('@/pages/admin/AdminServicesPage'))
+const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'))
 
 function App() {
   return (
@@ -58,15 +59,6 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/test/data" element={<TestDataViewer />} />
 
-            {/* Technician Registration (standalone, no dashboard layout) */}
-            <Route
-              path="/technician/register"
-              element={
-                <ProtectedRoute allowedRoles={['technician']}>
-                  <TechRegistrationPage />
-                </ProtectedRoute>
-              }
-            />
 
             {/* Public + Customer Routes with Header/Footer */}
             <Route element={<RootLayout />}>
@@ -155,6 +147,7 @@ function App() {
               <Route path="/admin/technicians" element={<AdminTechniciansPage />} />
               <Route path="/admin/bookings" element={<AdminBookingsPage />} />
               <Route path="/admin/services" element={<AdminServicesPage />} />
+              <Route path="/admin/settings" element={<AdminSettingsPage />} />
             </Route>
           </Routes>
         </Suspense>

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { ServiceCard } from '@/components/booking/ServiceCard'
 import { api } from '@/services/api'
 import { apiCache } from '@/utils/cache'
+import { ServiceCardSkeleton } from '@/components/common/skeletons'
 
 export default function ServicesPage() {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -132,7 +133,7 @@ export default function ServicesPage() {
             {isLoading ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                     {Array.from({ length: 15 }).map((_, idx) => (
-                        <div key={idx} className="h-[140px] w-full animate-pulse rounded-xl bg-muted" />
+                        <ServiceCardSkeleton key={idx} />
                     ))}
                 </div>
             ) : (
@@ -148,6 +149,7 @@ export default function ServicesPage() {
                                 estimatedDuration={service.estimated_duration}
                                 categoryName={service.categoryName}
                                 rating={service.rating || 4.5} // Dummy rating since not in DB yet
+                                imageUrl={service.image_url}
                             />
                         ))}
                     </div>

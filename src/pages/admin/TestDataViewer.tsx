@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { api } from '@/services/api'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { TableSkeleton } from '@/components/common/skeletons'
 
 export default function TestDataViewer() {
     const [data, setData] = useState<any>(null)
@@ -23,7 +24,15 @@ export default function TestDataViewer() {
         fetchDatabaseData()
     }, [])
 
-    if (isLoading) return <div className="p-8 text-center animate-pulse-soft">Loading Data from Supabase...</div>
+    if (isLoading) return (
+        <div className="p-6 max-w-[1400px] mx-auto space-y-6">
+            <div>
+                <div className="h-8 w-72 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-4 w-96 bg-muted animate-pulse rounded" />
+            </div>
+            <TableSkeleton rows={10} cols={5} />
+        </div>
+    )
     if (error) return <div className="p-8 text-center text-destructive">Error: {error}</div>
 
     const renderTable = (rows: any[]) => {

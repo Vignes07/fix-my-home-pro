@@ -13,6 +13,7 @@ interface ServiceCardProps {
     estimatedDuration: number
     categoryName?: string
     rating?: number
+    imageUrl?: string
     className?: string
 }
 
@@ -24,13 +25,26 @@ export function ServiceCard({
     estimatedDuration,
     categoryName,
     rating,
+    imageUrl,
     className,
 }: ServiceCardProps) {
     return (
         <Link to={`/services/${id}`}>
             <Card className={cn('group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1', className)}>
-                {/* Gradient top bar */}
-                <div className="h-1.5 bg-gradient-to-r from-primary to-accent" />
+                {/* Image Section */}
+                <div className="h-40 w-full overflow-hidden bg-muted">
+                    {imageUrl ? (
+                        <img
+                            src={imageUrl}
+                            alt={name}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-accent/20">
+                            <span className="text-4xl">🛠️</span>
+                        </div>
+                    )}
+                </div>
                 <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 space-y-2">
