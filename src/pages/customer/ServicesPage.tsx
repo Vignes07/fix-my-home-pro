@@ -131,14 +131,14 @@ export default function ServicesPage() {
 
             {/* Services Grid */}
             {isLoading ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from({ length: 15 }).map((_, idx) => (
                         <ServiceCardSkeleton key={idx} />
                     ))}
                 </div>
             ) : (
                 <>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {filteredServices.map((service) => (
                             <ServiceCard
                                 key={service.id}
@@ -148,8 +148,9 @@ export default function ServicesPage() {
                                 basePrice={service.base_price}
                                 estimatedDuration={service.estimated_duration}
                                 categoryName={service.categoryName}
-                                rating={service.rating || 4.5} // Dummy rating since not in DB yet
+                                rating={service.rating || 4.5}
                                 imageUrl={service.image_url}
+                                thumbnailUrl={service.thumbnail_url}
                             />
                         ))}
                     </div>

@@ -32,14 +32,6 @@ const BookingHistoryPage = lazy(() => import('@/pages/customer/BookingHistoryPag
 const ChatPage = lazy(() => import('@/pages/customer/ChatPage'))
 const ProfilePage = lazy(() => import('@/pages/customer/ProfilePage'))
 
-// Technician Pages (Lazy Loaded)
-const TechnicianDashboard = lazy(() => import('@/pages/technician/TechnicianDashboard'))
-
-const TechJobsPage = lazy(() => import('@/pages/technician/TechJobsPage'))
-const TechJobDetailPage = lazy(() => import('@/pages/technician/TechJobDetailPage'))
-const TechEarningsPage = lazy(() => import('@/pages/technician/TechEarningsPage'))
-const TechWalletPage = lazy(() => import('@/pages/technician/TechWalletPage'))
-
 // Admin Pages (Lazy Loaded)
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 const AdminTechniciansPage = lazy(() => import('@/pages/admin/AdminTechniciansPage'))
@@ -59,8 +51,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/test/data" element={<TestDataViewer />} />
 
-
-            {/* Public + Customer Routes with Header/Footer */}
+            {/* Public Routes with Header/Footer — accessible to ALL users */}
             <Route element={<RootLayout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
@@ -69,7 +60,7 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/join-us" element={<JoinUsPage />} />
 
-              {/* Protected Customer Routes */}
+              {/* Protected Routes — require login, same for all users */}
               <Route
                 path="/booking/new"
                 element={
@@ -118,21 +109,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-            </Route>
-
-            {/* Technician Dashboard Routes */}
-            <Route
-              element={
-                <ProtectedRoute allowedRoles={['technician']}>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/technician" element={<TechnicianDashboard />} />
-              <Route path="/technician/jobs" element={<TechJobsPage />} />
-              <Route path="/technician/jobs/:id" element={<TechJobDetailPage />} />
-              <Route path="/technician/earnings" element={<TechEarningsPage />} />
-              <Route path="/technician/wallet" element={<TechWalletPage />} />
             </Route>
 
             {/* Admin Dashboard Routes */}

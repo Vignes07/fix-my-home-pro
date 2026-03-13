@@ -273,14 +273,6 @@ export default function HomePage() {
                     <div className="py-20 text-center text-gray-500">No services found in database.</div>
                 )}
             </div>
-
-            {/* ====== FULL WIDTH BANNER ====== */}
-            <section className="bg-[#111111] py-16 text-center text-white my-8">
-                <h2 className="text-3xl font-bold mb-4">FixMyHome Pro Smart Locks</h2>
-                <p className="text-gray-400 mb-8 max-w-2xl mx-auto">Enhance your home security with keyless entry, remote access, and real-time alerts. Installation included.</p>
-                <img src={imgSmart} className="h-64 rounded-2xl mx-auto object-cover border border-gray-800 max-w-[80%] md:max-w-md mb-8 shadow-2xl" alt="Smart Locks" />
-                <Button className="bg-white text-black hover:bg-gray-200" onClick={() => navigate('/services')}>Buy Now</Button>
-            </section>
         </div>
     )
 }

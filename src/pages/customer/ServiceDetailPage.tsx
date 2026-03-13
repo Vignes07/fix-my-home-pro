@@ -88,12 +88,12 @@ export default function ServiceDetailPage() {
     }
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12 animate-fade-in bg-slate-50 min-h-screen">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12 animate-fade-in min-h-screen">
 
             {/* Hero Image */}
             <div className="w-full h-[400px] md:h-[500px] rounded-[32px] overflow-hidden relative shadow-lg">
                 <img
-                    src={service.image_url || "https://placehold.co/1235x725/e2e8f0/64748b"}
+                    src={(service as any).detail_image_url || service.image_url || "https://placehold.co/1235x725/e2e8f0/64748b"}
                     alt={service.name}
                     className="w-full h-full object-cover"
                 />
@@ -109,57 +109,79 @@ export default function ServiceDetailPage() {
                 {/* Left Column - Details */}
                 <div className="space-y-12">
 
-                    {/* Includes & Metadata */}
-                    <div className="grid md:grid-cols-2 gap-8 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                        <div>
-                            <h3 className="text-xl font-bold mb-4 font-['Inter']">Includes</h3>
-                            <ul className="space-y-3">
-                                {includesList.map((inc: string, i: number) => (
-                                    <li key={i} className="flex items-start gap-3 text-slate-700 text-lg">
-                                        <CheckCircle2 className="h-6 w-6 text-emerald-500 shrink-0" />
-                                        {inc}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div className="flex flex-col justify-center space-y-6 md:pl-8 md:border-l border-slate-200">
+                    {/* Service Overview */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                                <p className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Starting Price</p>
+                                <p className="text-3xl font-bold text-primary">{formatPrice(basePrice)}</p>
+                            </div>
                             <div>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Estimated Time</p>
                                 <p className="text-2xl font-semibold text-slate-900">{service.estimated_duration || 60} mins – 2 hrs</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Starting Price</p>
-                                <p className="text-2xl font-semibold text-primary">{formatPrice(basePrice)}</p>
-                            </div>
                         </div>
+                        {service.description && (
+                            <p className="mt-4 text-slate-600 leading-relaxed">{service.description}</p>
+                        )}
                     </div>
 
-                    {/* Select Service Type (Options) */}
+                    {/* Select Service Type (Options) — each with its own includes, duration, and rating */}
                     <div>
                         <h2 className="text-3xl font-bold mb-6 font-['Lato']">Select Service Type</h2>
                         <div className="grid gap-4">
                             {optionsList.map((opt: ServiceOption) => {
                                 const isSelected = selectedOptions.includes(opt.id)
+                                const optIncludes = (opt as any).includes || []
+                                const optDuration = opt.estimated_duration || 60
+                                const optRating = (opt as any).avg_rating || 0
+                                const optRatingCount = (opt as any).rating_count || 0
                                 return (
                                     <div
                                         key={opt.id}
                                         className={cn(
-                                            "flex items-center justify-between p-6 rounded-2xl border-2 transition-all cursor-pointer",
+                                            "p-6 rounded-2xl border-2 transition-all cursor-pointer",
                                             isSelected ? "border-primary bg-primary/5" : "border-slate-200 bg-white hover:border-primary/50"
                                         )}
                                         onClick={() => toggleOption(opt.id)}
                                     >
-                                        <div>
-                                            <h4 className="text-xl font-bold">{opt.name}</h4>
-                                            <p className="text-primary font-bold mt-1">{formatPrice(opt.price)}</p>
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <h4 className="text-xl font-bold">{opt.name}</h4>
+                                                <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+                                                    <span className="font-semibold text-primary text-base">{formatPrice(opt.price)}</span>
+                                                    <span className="flex items-center gap-1">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        {optDuration} min
+                                                    </span>
+                                                    {optRating > 0 && (
+                                                        <span className="flex items-center gap-1 text-amber-500">
+                                                            <Star className="h-3.5 w-3.5 fill-amber-400" />
+                                                            {optRating.toFixed(1)} ({optRatingCount})
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Per-option includes */}
+                                                {optIncludes.length > 0 && (
+                                                    <ul className="mt-3 space-y-1.5">
+                                                        {optIncludes.map((inc: string, i: number) => (
+                                                            <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                                                                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                                                                {inc}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                            <Button
+                                                variant={isSelected ? "default" : "outline"}
+                                                className="rounded-full px-6 font-bold ml-4 shrink-0"
+                                            >
+                                                {isSelected ? <Check className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
+                                                {isSelected ? "Selected" : "Add"}
+                                            </Button>
                                         </div>
-                                        <Button
-                                            variant={isSelected ? "default" : "outline"}
-                                            className="rounded-full px-6 font-bold"
-                                        >
-                                            {isSelected ? <Check className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
-                                            {isSelected ? "Selected" : "Add to Cart"}
-                                        </Button>
                                     </div>
                                 )
                             })}

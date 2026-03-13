@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Mail, Lock, User, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,7 +11,6 @@ import { Logo } from '@/components/common/Logo'
 import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema'
 import { authService } from '@/services/auth.service'
 import { supabase } from '@/services/supabase'
-import { cn } from '@/utils/cn'
 
 export default function RegisterPage() {
     const navigate = useNavigate()
@@ -21,8 +20,6 @@ export default function RegisterPage() {
     const {
         register,
         handleSubmit,
-        watch,
-        setValue,
         formState: { errors },
     } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
@@ -35,22 +32,20 @@ export default function RegisterPage() {
         },
     })
 
-    const selectedType = watch('user_type')
-
     const onSubmit = async (data: RegisterFormData) => {
         setIsLoading(true)
         setError(null)
         try {
             const phone = data.phone.startsWith('+91') ? data.phone : `+91${data.phone}`
 
-            // 1. Create auth user in Supabase Auth
+            // Create auth user in Supabase Auth — always as 'customer'
             const result = await authService.signUp(data.email, data.password, {
                 full_name: data.full_name,
                 phone: phone,
-                user_type: data.user_type
+                user_type: 'customer'
             })
 
-            // 2. Insert user into the `users` table so it shows up in the DB
+            // Insert user into the `users` table
             if (result.user) {
                 const { error: insertError } = await supabase
                     .from('users')
@@ -59,7 +54,7 @@ export default function RegisterPage() {
                         full_name: data.full_name,
                         email: data.email,
                         phone: phone,
-                        user_type: data.user_type,
+                        user_type: 'customer',
                         is_active: true,
                     }], { onConflict: 'id' })
 
@@ -79,6 +74,7 @@ export default function RegisterPage() {
     return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
             <div className="w-full max-w-md animate-fade-in">
+                {/* Logo */}
                 <div className="mb-8 text-center">
                     <div className="mb-4 flex justify-center">
                         <Logo size="lg" />
@@ -98,43 +94,19 @@ export default function RegisterPage() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                            {/* User Type Selection */}
-                            <div className="space-y-2">
-                                <Label>I am a</Label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {(['customer', 'technician'] as const).map((type) => (
-                                        <button
-                                            key={type}
-                                            type="button"
-                                            onClick={() => setValue('user_type', type)}
-                                            className={cn(
-                                                'rounded-xl border-2 p-4 text-center transition-all',
-                                                selectedType === type
-                                                    ? 'border-primary bg-primary/5 text-primary'
-                                                    : 'border-border hover:border-primary/30'
-                                            )}
-                                        >
-                                            <p className="text-sm font-semibold capitalize">{type}</p>
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {type === 'customer'
-                                                    ? 'I need home services'
-                                                    : 'I provide services'}
-                                            </p>
-                                        </button>
-                                    ))}
-                                </div>
-                                {errors.user_type && (
-                                    <p className="text-sm text-destructive">{errors.user_type.message}</p>
-                                )}
-                            </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="full_name">Full Name</Label>
-                                <Input
-                                    id="full_name"
-                                    placeholder="Enter your full name"
-                                    {...register('full_name')}
-                                />
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        <User className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        id="full_name"
+                                        placeholder="Enter your full name"
+                                        className="pl-10"
+                                        {...register('full_name')}
+                                    />
+                                </div>
                                 {errors.full_name && (
                                     <p className="text-sm text-destructive">{errors.full_name.message}</p>
                                 )}
@@ -142,12 +114,18 @@ export default function RegisterPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    {...register('email')}
-                                />
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        <Mail className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="your@email.com"
+                                        className="pl-10"
+                                        {...register('email')}
+                                    />
+                                </div>
                                 {errors.email && (
                                     <p className="text-sm text-destructive">{errors.email.message}</p>
                                 )}
@@ -155,13 +133,19 @@ export default function RegisterPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Phone Number</Label>
-                                <Input
-                                    id="phone"
-                                    type="tel"
-                                    placeholder="Enter your phone number"
-                                    maxLength={10}
-                                    {...register('phone')}
-                                />
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        <Phone className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        placeholder="10-digit mobile number"
+                                        maxLength={10}
+                                        className="pl-10"
+                                        {...register('phone')}
+                                    />
+                                </div>
                                 {errors.phone && (
                                     <p className="text-sm text-destructive">{errors.phone.message}</p>
                                 )}
@@ -169,12 +153,18 @@ export default function RegisterPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Create a password"
-                                    {...register('password')}
-                                />
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                        <Lock className="h-4 w-4" />
+                                    </div>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Create a strong password"
+                                        className="pl-10"
+                                        {...register('password')}
+                                    />
+                                </div>
                                 {errors.password && (
                                     <p className="text-sm text-destructive">{errors.password.message}</p>
                                 )}
@@ -199,6 +189,17 @@ export default function RegisterPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                <p className="mt-6 text-center text-xs text-muted-foreground">
+                    By continuing, you agree to our{' '}
+                    <Link to="/terms" className="underline hover:text-foreground">
+                        Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link to="/privacy" className="underline hover:text-foreground">
+                        Privacy Policy
+                    </Link>
+                </p>
             </div>
         </div>
     )

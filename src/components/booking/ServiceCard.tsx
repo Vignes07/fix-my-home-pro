@@ -14,6 +14,7 @@ interface ServiceCardProps {
     categoryName?: string
     rating?: number
     imageUrl?: string
+    thumbnailUrl?: string
     className?: string
 }
 
@@ -26,16 +27,18 @@ export function ServiceCard({
     categoryName,
     rating,
     imageUrl,
+    thumbnailUrl,
     className,
 }: ServiceCardProps) {
+    const displayImage = thumbnailUrl || imageUrl
     return (
         <Link to={`/services/${id}`}>
             <Card className={cn('group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1', className)}>
                 {/* Image Section */}
                 <div className="h-40 w-full overflow-hidden bg-muted">
-                    {imageUrl ? (
+                    {displayImage ? (
                         <img
-                            src={imageUrl}
+                            src={displayImage}
                             alt={name}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />

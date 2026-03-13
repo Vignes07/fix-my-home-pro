@@ -14,6 +14,9 @@ export interface ServiceOption {
     price: number
     estimated_duration?: number
     image_url?: string
+    includes?: string[]
+    avg_rating?: number
+    rating_count?: number
 }
 
 export interface Service {
@@ -26,6 +29,8 @@ export interface Service {
     is_active: boolean
     category?: ServiceCategory
     image_url?: string
+    thumbnail_url?: string
+    detail_image_url?: string
     categoryName?: string
     includes?: string[]
     service_options?: ServiceOption[]
