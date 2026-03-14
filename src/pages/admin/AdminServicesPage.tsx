@@ -167,7 +167,7 @@ export default function AdminServicesPage() {
     const [optionsLoading, setOptionsLoading] = useState(false)
     const [showOptionForm, setShowOptionForm] = useState(false)
     const [editingOptionId, setEditingOptionId] = useState<string | null>(null)
-    const [optionForm, setOptionForm] = useState({ name: '', price: 0, estimated_duration: 60, includes: '' })
+    const [optionForm, setOptionForm] = useState({ name: '', description: '', price: 0, estimated_duration: 60, includes: '' })
 
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -332,7 +332,7 @@ export default function AdminServicesPage() {
 
     const openAddOption = () => {
         setEditingOptionId(null)
-        setOptionForm({ name: '', price: 0, estimated_duration: 60, includes: '' })
+        setOptionForm({ name: '', description: '', price: 0, estimated_duration: 60, includes: '' })
         setShowOptionForm(true)
         setError(null)
     }
@@ -341,6 +341,7 @@ export default function AdminServicesPage() {
         setEditingOptionId(opt.id)
         setOptionForm({
             name: opt.name,
+            description: opt.description || '',
             price: opt.price,
             estimated_duration: opt.estimated_duration || 60,
             includes: (opt.includes || []).join('\n'),
@@ -361,6 +362,7 @@ export default function AdminServicesPage() {
             if (editingOptionId) {
                 await api.patch(`/services/admin/options/${editingOptionId}`, {
                     name: optionForm.name,
+                    description: optionForm.description,
                     price: optionForm.price,
                     estimated_duration: optionForm.estimated_duration,
                     includes: includesArr,
@@ -368,6 +370,7 @@ export default function AdminServicesPage() {
             } else {
                 await api.post(`/services/admin/${optionsServiceId}/options`, {
                     name: optionForm.name,
+                    description: optionForm.description,
                     price: optionForm.price,
                     estimated_duration: optionForm.estimated_duration,
                     includes: includesArr,
@@ -722,6 +725,9 @@ export default function AdminServicesPage() {
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <h4 className="font-semibold text-base">{opt.name}</h4>
+                                                    {opt.description && (
+                                                        <p className="text-sm text-muted-foreground mt-0.5">{opt.description}</p>
+                                                    )}
                                                     <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                                                         <span className="font-medium text-primary">₹{opt.price}</span>
                                                         <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{opt.estimated_duration || 60} min</span>
@@ -757,6 +763,15 @@ export default function AdminServicesPage() {
                                     <div>
                                         <Label>Type Name *</Label>
                                         <Input className="mt-1" value={optionForm.name} onChange={e => setOptionForm({ ...optionForm, name: e.target.value })} placeholder="e.g. Deep Cleaning" />
+                                    </div>
+                                    <div>
+                                        <Label>Description</Label>
+                                        <textarea
+                                            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[60px] ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                                            value={optionForm.description}
+                                            onChange={e => setOptionForm({ ...optionForm, description: e.target.value })}
+                                            placeholder="Brief description of what this service type provides..."
+                                        />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>

@@ -192,7 +192,7 @@ export default function HomePage() {
                         const dark = isDarkOffer(bgColor)
                         const img = offer.image_url || fallbackImgList[idx % fallbackImgList.length]
                         return (
-                            <div key={idx} className="min-w-[390px] flex-shrink-0 cursor-pointer snap-start overflow-hidden rounded-2xl relative h-[200px] border border-gray-200 group" style={{ background: bgColor }}>
+                            <div key={idx} className="min-w-[20vw] flex-shrink-0 cursor-pointer snap-start overflow-hidden rounded-2xl relative h-[200px] border border-gray-200 group" style={{ background: bgColor }}>
                                 <div className="absolute inset-y-0 left-0 w-2/3 p-8 flex flex-col justify-center z-10">
                                     <h3 className={`text-2xl font-bold leading-tight mb-2 ${dark ? 'text-white' : 'text-[#1f1f1f]'}`}>
                                         {offer.title.split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}

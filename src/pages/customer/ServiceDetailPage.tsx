@@ -148,6 +148,9 @@ export default function ServiceDetailPage() {
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <h4 className="text-xl font-bold">{opt.name}</h4>
+                                                {opt.description && (
+                                                    <p className="text-sm text-slate-500 mt-1">{opt.description}</p>
+                                                )}
                                                 <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
                                                     <span className="font-semibold text-primary text-base">{formatPrice(opt.price)}</span>
                                                     <span className="flex items-center gap-1">
