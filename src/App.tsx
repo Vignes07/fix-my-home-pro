@@ -38,6 +38,7 @@ const AdminTechniciansPage = lazy(() => import('@/pages/admin/AdminTechniciansPa
 const AdminBookingsPage = lazy(() => import('@/pages/admin/AdminBookingsPage'))
 const AdminServicesPage = lazy(() => import('@/pages/admin/AdminServicesPage'))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'))
+const AdminContentPage = lazy(() => import('@/pages/admin/AdminContentPage'))
 
 function App() {
   return (
@@ -123,6 +124,7 @@ function App() {
               <Route path="/admin/technicians" element={<AdminTechniciansPage />} />
               <Route path="/admin/bookings" element={<AdminBookingsPage />} />
               <Route path="/admin/services" element={<AdminServicesPage />} />
+              <Route path="/admin/content" element={<AdminContentPage />} />
               <Route path="/admin/settings" element={<AdminSettingsPage />} />
             </Route>
           </Routes>

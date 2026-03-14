@@ -8,6 +8,7 @@ import {
     CalendarCheck,
     Settings,
     ShieldCheck,
+    FileText,
     ChevronLeft,
     X,
 } from 'lucide-react'
@@ -34,6 +35,7 @@ const adminLinks: SidebarLink[] = [
     { label: 'Technicians', path: '/admin/technicians', icon: <Users className="h-4 w-4" /> },
     { label: 'Bookings', path: '/admin/bookings', icon: <CalendarCheck className="h-4 w-4" /> },
     { label: 'Services', path: '/admin/services', icon: <Settings className="h-4 w-4" /> },
+    { label: 'Site Content', path: '/admin/content', icon: <FileText className="h-4 w-4" /> },
     { label: 'Roles', path: '/admin/settings', icon: <ShieldCheck className="h-4 w-4" /> },
 ]
 
