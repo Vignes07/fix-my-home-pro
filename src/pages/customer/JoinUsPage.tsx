@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Star } from 'lucide-react'
+import { useSiteContent } from '@/hooks/useSiteContent'
 
 const imgJoinHero = new URL('@/assets/images/01_1.png', import.meta.url).href
 const imgAppMockup = new URL('@/assets/images/app_01_1.png', import.meta.url).href
@@ -39,7 +40,18 @@ const testimonials = [
     },
 ]
 
+
 export default function JoinUsPage() {
+
+    const { getSection, getItems, loading: contentLoading } = useSiteContent()
+
+    const joinCta = getSection('join_cta')
+    const ctaTitle = joinCta?.title || 'Earn More. Work Flexible.\nJoin FixMyHome Pro'
+    const ctaSubtitle = joinCta?.subtitle || 'Get regular jobs • Flexible schedule • Secure payments'
+    const ctaBtnText = joinCta?.button_text || 'Register Now'
+    const ctaBtnLink = joinCta?.button_link || '/join-us'
+
+
     return (
         <div className="animate-fade-in">
             {/* Hero */}
@@ -86,7 +98,7 @@ export default function JoinUsPage() {
             </section>
 
             {/* How to join */}
-            <section className="bg-[#001c30] py-16">
+            <section className="bg-[#001c30] py-16 mb-10">
                 <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[100px]">
                     <h2 className="text-center text-[36px] font-medium text-white">How to Join?</h2>
                     <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -104,19 +116,19 @@ export default function JoinUsPage() {
             </section>
 
             {/* Join CTA */}
-            <section className="relative mx-auto max-w-[1440px] overflow-hidden">
+            <section className="relative mx-auto max-w-[1440px] overflow-hidden rounded-2xl mb-10">
                 <div className="relative h-[471px] w-full bg-[#001c30]">
                     <div className="absolute left-[112px] top-1/2 -translate-y-1/2">
                         <h2 className="text-[40px] font-bold capitalize leading-[1.2] tracking-[-0.8px] text-white">
-                            Earn More. Work Flexible.<br />Join FixMyHome Pro
+                            {ctaTitle.split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}
                         </h2>
-                        <p className="mt-4 text-[20px] text-white">Get regular jobs • Flexible schedule • Secure payments</p>
-                        <Link to="/technician/register" className="mt-6 inline-flex rounded-[40px] bg-[#facc15] px-10 py-5 text-[20px] font-semibold text-black hover:bg-[#e5b800]">
-                            Register Now
+                        <p className="mt-4 text-[20px] text-white">{ctaSubtitle}</p>
+                        <Link to={ctaBtnLink} className="mt-6 inline-flex rounded-[40px] bg-[#facc15] px-10 py-5 text-[20px] font-semibold text-black hover:bg-[#e5b800]">
+                            {ctaBtnText}
                         </Link>
                     </div>
-                    <div className="absolute right-[100px] top-[-20px] h-[428px] w-[515px]">
-                        <img src={imgAppMockup} alt="FixPro App" className="h-full w-full object-contain" />
+                    <div className="absolute right-[100px] top-[20px] h-[428px] w-[515px]">
+                        <img src={joinCta?.image_url || imgAppMockup} alt="FixPro App" className="h-full w-full object-contain" />
                     </div>
                 </div>
             </section>

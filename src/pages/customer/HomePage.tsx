@@ -22,6 +22,7 @@ const imgACCard = new URL('@/assets/images/rectangle_4408.png', import.meta.url)
 const imgCivilCard = new URL('@/assets/images/rectangle_4409.png', import.meta.url).href
 
 const imgAppMockup = new URL('@/assets/images/app_01_1.png', import.meta.url).href
+const imgHero = new URL('@/assets/images/01_1.png', import.meta.url).href
 
 const fallbackImgList = [imgElectrical, imgPlumbing, imgAC, imgCleaning, imgPainting, imgMechanical, imgCivil, imgSmart]
 
@@ -168,12 +169,9 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Image Grid */}
-                    <div className="hidden lg:grid grid-cols-2 grid-rows-2 gap-4">
-                        <img src={hero?.image_url || imgElectrical} className="h-full w-full rounded-2xl object-cover col-span-1 row-span-1 border border-gray-100" alt="Service 1" />
-                        <img src={imgPlumbing} className="h-full w-full rounded-2xl object-cover col-span-1 row-span-1 border border-gray-100" alt="Service 2" />
-                        <img src={imgCleaning} className="h-full w-full rounded-2xl object-cover col-span-1 row-span-1 border border-gray-100" alt="Service 3" />
-                        <img src={imgSmart} className="h-full w-full rounded-2xl object-cover col-span-1 row-span-1 border border-gray-100" alt="Service 4" />
+                    {/* Right Column: Hero Image */}
+                    <div className="hidden lg:flex items-center justify-center">
+                        <img src={imgHero} className="h-full w-full rounded-2xl object-cover border border-gray-100" alt="FixMyHome Pro" />
                     </div>
                 </div>
             </section>
